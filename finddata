@@ -1,0 +1,6 @@
+Baud rate of CAN: 1 Mbit/s
+Needs some activity on CAN bus to switch to CAN mode
+	What kind of activity?
+	Any arbitrary data seems to work
+A control frame sets all parameters of the talon at once
+Request device ID
