@@ -1,4 +1,4 @@
-#include "HAL/CanTalonSRX.h"
+#include "CanTalonSRX.h"
 #include <memory>
 #include <iostream>
 
