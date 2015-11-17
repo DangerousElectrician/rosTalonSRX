@@ -1,5 +1,10 @@
-#include "CanTalonSRX.h"
+#include "HAL/CanTalonSRX.h"
+#include <memory>
+#include <iostream>
 
 int main() {
-	CanTalonSRX motor = CanTalonSRX(0);
+	CanTalonSRX motor ();
+	std::cout << "hello";
+	//std::unique_ptr<CanTalonSRX> m_impl;
+	//m_impl(new CanTalonSRX(0));
 }
