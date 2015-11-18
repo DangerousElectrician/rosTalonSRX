@@ -76,8 +76,8 @@
  * auto generated using spreadsheet and WpiClassGen.csproj
  * @link https://docs.google.com/spreadsheets/d/1OU_ZV7fZLGYUQ-Uhc8sVAmUmWTlT8XBFYK8lfjg_tac/edit#gid=1766046967
  */
-#include "HAL/CanTalonSRX.h"
-#include "FRC_NetworkCommunication/CANSessionMux.h"	//CAN Comm
+#include "CanTalonSRX.h"
+#include "CANSessionMux.h"	//CAN Comm
 #include <string.h> // memset
 #include <unistd.h> // usleep
 
