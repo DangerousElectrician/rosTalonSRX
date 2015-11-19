@@ -4,3 +4,7 @@ Needs some activity on CAN bus to switch to CAN mode
 	Any arbitrary data seems to work
 A control frame sets all parameters of the talon at once
 Request device ID
+
+Figure out the functionsin CANSessionMux
+
+g++ -Wall CANSessionMux.h CANSessionMux.cpp CanTalonSRX.h CanTalonSRX.cpp CtreCanNode.h CtreCanNode.cpp ctre.h test.cpp -std=c++0x
