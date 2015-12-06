@@ -81,6 +81,8 @@
 #include <string.h> // memset
 #include <unistd.h> // usleep
 
+#include <iostream>
+
 #define STATUS_1  		0x02041400
 #define STATUS_2  		0x02041440
 #define STATUS_3  		0x02041480

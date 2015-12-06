@@ -1,10 +1,30 @@
 Baud rate of CAN: 1 Mbit/s
 Needs some activity on CAN bus to switch to CAN mode
 	What kind of activity?
-	Any arbitrary data seems to work
+		Any arbitrary data seems to work
 A control frame sets all parameters of the talon at once
+	10 ms control frame
 Request device ID
 
-Figure out the functionsin CANSessionMux
+Figure out the functions in CANSessionMux
 
 g++ -Wall CANSessionMux.h CANSessionMux.cpp CanTalonSRX.h CanTalonSRX.cpp CtreCanNode.h CtreCanNode.cpp ctre.h test.cpp -std=c++0x
+
+"cout <<" will try to print a uint8 as an ascii character
+
+bytes over serial
+1 byte length, 4 byte id, 4 byte period, 1..8 byte data
+17 byte total
+
+10 ms status frame 
+	4th byte
+		1st and 2nd bytes are limit switches
+
+Talon SRX needs to receive a token to enable output
+	heartbeat every 100ms? 
+		jaguar does this
+	2 bytes at beginning of control frame?
+		CanTalonSRX has a  _TALON_Control_1_General_10ms_t struct with a space for 2 bytes of token (line 125)
+	very little public documentation
+	changing the control mode works
+		change was reflected in 10ms control frame

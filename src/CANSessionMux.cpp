@@ -9,7 +9,11 @@ extern "C"
 #endif  
         
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
-		std::cout << "sendCAN" << std::endl;
+		std::cout << "sendCAN " << messageID << "\t";
+		for(int i = 0; i < dataSize; i++) {
+			std::cout << unsigned(data[i]) << "\t";
+		}
+		std::cout << "datsize:" << unsigned(dataSize) << "\tper:" << periodMs << std::endl;
 	}
 	void FRC_NetworkCommunication_CANSessionMux_receiveMessage(uint32_t *messageID, uint32_t messageIDMask, uint8_t *data, uint8_t *dataSize, uint32_t *timeStamp, int32_t *status) {
 		std::cout << "recvCAN" << std::endl;
