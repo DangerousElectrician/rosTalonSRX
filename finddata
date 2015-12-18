@@ -72,3 +72,12 @@ Create a motor control node?
 	CanTalonSRX has many functions, reimplementing would be time consuming
 Run in an existing node?
 	No need to reimplement functions to work with ROS messages.
+
+
+Layout
+	Start ROS node
+	Construct CANTalonSRX
+		pass ROS node as parameter
+		CANTalonSRX saves node in pointer
+	Use normal CANTalonSRX api
+	Send ROS messages to a CAN bridge
