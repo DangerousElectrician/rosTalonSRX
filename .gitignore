@@ -1,4 +1,13 @@
+*~
+.cproject
+.project
+.pydevproject
+.catkin_workspace
 *.swp
-*.o
-*.out
-*.gch
+cmake_install.cmake
+build/
+devel/
+bin/
+lib/
+msg_gen/
+srv_gen/

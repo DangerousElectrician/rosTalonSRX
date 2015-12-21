@@ -1,7 +1,12 @@
 #include "CanTalonSRX.h"
 #include <iostream>
+#include "ros/ros.h"
 
-int main() {
+//#include "std_msgs/String.h"
+
+int main(int argc, char **argv) {
+	ros::init(argc, argv, "talontest");
+
 	CanTalonSRX motor (0);
 	
 	//std::cout << "setprofile" << std::endl;

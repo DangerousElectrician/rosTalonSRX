@@ -4,7 +4,10 @@ project(can_talon_ros)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -63,7 +66,7 @@ find_package(catkin REQUIRED)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   std_msgs
 # )
 
 ################################################
@@ -98,7 +101,7 @@ find_package(catkin REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES can_talon_ros
-#  CATKIN_DEPENDS other_catkin_pkg
+#  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -106,14 +109,28 @@ catkin_package(
 ## Build ##
 ###########
 
+set( CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}" )
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+include_directories(
+	include
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(can_talon_ros
 #   src/${PROJECT_NAME}/can_talon_ros.cpp
 # )
+add_library(CANSessionMux src/CANSessionMux.cpp )
+#target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
+
+add_library(CanTalonSRX	src/CanTalonSRX.cpp )
+target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)
+
+add_library(CtreCanNode	src/CtreCanNode.cpp)
+#target_link_libraries(CtreCanNode ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -122,13 +139,15 @@ catkin_package(
 
 ## Declare a C++ executable
 # add_executable(can_talon_ros_node src/can_talon_ros_node.cpp)
+add_executable(can_talon_ros_node src/test.cpp)
+target_link_libraries(can_talon_ros_node CanTalonSRX ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(can_talon_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(can_talon_ros_node
+# target_link_libraries(
 #   ${catkin_LIBRARIES}
 # )
 
