@@ -1,6 +1,7 @@
 #include "HAL/CanTalonSRX.h"
 #include <iostream>
 #include "ros/ros.h"
+#include <vector>
 
 #include "can_talon_ros/CANSend.h"
 //#include "std_msgs/String.h"
@@ -12,25 +13,33 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	
 	ros::Publisher CANSend_pub = n.advertise<can_talon_ros::CANSend>("CANSend",100);
-	//ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
 
-	ros::Rate loop_rate(100);
+	ros::Rate loop_rate(500);
 
 	while(ros::ok()) {
+		
+		can_talon_ros::CANSend msg;
 
-		CanTalonSRX motor (0);
+		msg.arbID = 32;
+		msg.size = 255;
+		std::vector<uint8_t> candata = {1,2,3,4,5,6,7,8};
+		msg.data = candata;
+		//CanTalonSRX motor (0);
 		
 		//std::cout << "setprofile" << std::endl;
 		//motor.SetProfileSlotSelect(1);	
-		std::cout << "setmode" << std::endl;
-		motor.SetModeSelect(4, 133);
+		//std::cout << "setmode" << std::endl;
+		//motor.SetModeSelect(4, 133);
 
-		std::cout << "set1" << std::endl;
-		motor.Set(.1);
+		//std::cout << "set1" << std::endl;
+		//motor.Set(.1);
 
-		std::cout << "set2" << std::endl;
-		motor.Set(1);
+		//std::cout << "set2" << std::endl;
+		//motor.Set(1);
 
-		std::cout << "done" << std::endl;
+		//std::cout << "done" << std::endl;
+
+		ros::spinOnce();
+		loop_rate.sleep();
 	}
 }
