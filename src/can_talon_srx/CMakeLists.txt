@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(can_talon_ros)
+project(can_talon_srx)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -142,9 +142,9 @@ add_library(CtreCanNode	src/CtreCanNode.cpp)
 
 ## Declare a C++ executable
 # add_executable(can_talon_ros_node src/can_talon_ros_node.cpp)
-add_executable(can_talon_ros_node src/test.cpp)
-target_link_libraries(can_talon_ros_node CanTalonSRX ${catkin_LIBRARIES} )
-add_dependencies(can_talon_ros_node can_talon_ros_generate_messages_cpp)
+add_executable(can_talon_srx_node src/test.cpp)
+target_link_libraries(can_talon_srx_node CanTalonSRX ${catkin_LIBRARIES} )
+add_dependencies(can_talon_srx_node can_talon_srx_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

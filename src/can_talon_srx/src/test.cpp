@@ -3,7 +3,7 @@
 #include "ros/ros.h"
 #include <vector>
 
-#include "can_talon_ros/CANSend.h"
+#include "can_talon_srx/CANSend.h"
 //#include "std_msgs/String.h"
 
 //#include "std_msgs/String.h"
@@ -12,13 +12,13 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "talontest");
 	ros::NodeHandle n;
 	
-	ros::Publisher CANSend_pub = n.advertise<can_talon_ros::CANSend>("CANSend",100);
+	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 
 	ros::Rate loop_rate(2); //in hertz
 
 	while(ros::ok()) {
 		
-		can_talon_ros::CANSend msg;
+		can_talon_srx::CANSend msg;
 
 		msg.arbID = 32;
 		msg.size = 255;

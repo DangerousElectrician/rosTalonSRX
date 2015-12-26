@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>can_talon_ros</name>
+  <name>can_talon_srx</name>
   <version>0.0.0</version>
-  <description>The can_talon_ros package</description>
+  <description>The can_talon_srx package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
