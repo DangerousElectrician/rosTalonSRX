@@ -21,9 +21,6 @@ int main(int argc, char **argv) {
 	CanTalonSRX motor (0);
 	while(ros::ok()) {
 		
-		//can_talon_srx::CANSend msg;
-
-		//msg.arbID = 32;
 		//msg.size = 255;
 		//std::vector<uint8_t> candata = {1,2,3,4,5,6,7,8};
 		////std::cout<<candata.size()<<std::endl;

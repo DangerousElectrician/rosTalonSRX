@@ -19,8 +19,9 @@ extern "C"
 
 		msg.arbID = messageID;
 		msg.size = dataSize;
-		std::vector<uint8_t> candata(data, data+dataSize);// = {1,2,3,4,5,6,7,8};
+		std::vector<uint8_t> candata(data, data+dataSize);
 		msg.data = candata;
+		msg.periodMs = periodMs;
 		CANSend_pub->publish(msg);
 
 		std::cout << "sendCAN " << messageID << "\t";
