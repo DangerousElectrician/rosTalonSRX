@@ -2,13 +2,30 @@
 #include "FRC_NetworkCommunication/CANSessionMux.h"
 
 #include <iostream>
+#include <vector>
+
+#include "can_talon_srx/CANSend.h"
+#include "ros/ros.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif  
+	ros::Publisher *CANSend_pub;
         
+	void init_CANSend(ros::Publisher CANSend_ros_pub) {
+		CANSend_pub = &CANSend_ros_pub;
+	}
+
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
+		can_talon_srx::CANSend msg;
+
+		msg.arbID = 32;
+		msg.size = 255;
+		std::vector<uint8_t> candata = {1,2,3,4,5,6,7,8};
+		msg.data = candata;
+		CANSend_pub->publish(msg);
+
 		std::cout << "sendCAN " << messageID << "\t";
 		for(int i = 0; i < dataSize; i++) {
 			std::cout << unsigned(data[i]) << "\t";
