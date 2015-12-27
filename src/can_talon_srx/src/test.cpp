@@ -2,6 +2,7 @@
 #include <iostream>
 #include "ros/ros.h"
 #include <vector>
+#include "FRC_NetworkCommunication/CANSessionMux.h"
 
 #include "can_talon_srx/CANSend.h"
 //#include "std_msgs/String.h"
@@ -16,19 +17,20 @@ int main(int argc, char **argv) {
 
 	ros::Rate loop_rate(2); //in hertz
 
+	init_CANSend(CANSend_pub);
+	CanTalonSRX motor (0);
 	while(ros::ok()) {
 		
-		can_talon_srx::CANSend msg;
+		//can_talon_srx::CANSend msg;
 
-		msg.arbID = 32;
-		msg.size = 255;
-		std::vector<uint8_t> candata = {1,2,3,4,5,6,7,8};
-		//std::cout<<candata.size()<<std::endl;
-		msg.data = candata;
+		//msg.arbID = 32;
+		//msg.size = 255;
+		//std::vector<uint8_t> candata = {1,2,3,4,5,6,7,8};
+		////std::cout<<candata.size()<<std::endl;
+		//msg.data = candata;
 		
-		CANSend_pub.publish(msg);
+		//CANSend_pub.publish(msg);
 
-		//CanTalonSRX motor (0);
 		
 		//std::cout << "setprofile" << std::endl;
 		//motor.SetProfileSlotSelect(1);	
@@ -36,10 +38,10 @@ int main(int argc, char **argv) {
 		//motor.SetModeSelect(4, 133);
 
 		//std::cout << "set1" << std::endl;
-		//motor.Set(.1);
+		motor.Set(.1);
 
 		//std::cout << "set2" << std::endl;
-		//motor.Set(1);
+		motor.Set(1);
 
 		//std::cout << "done" << std::endl;
 
