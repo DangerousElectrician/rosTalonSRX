@@ -49,7 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
-add_message_files(DIRECTORY msg FILES CANSend.msg)
+add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -127,7 +127,8 @@ include_directories(
 #   src/${PROJECT_NAME}/can_talon_ros.cpp
 # )
 add_library(CANSessionMux src/CANSessionMux.cpp )
-#target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
+target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
+add_dependencies(CANSessionMux can_talon_srx_generate_messages_cpp)
 
 add_library(CanTalonSRX	src/CanTalonSRX.cpp )
 target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)

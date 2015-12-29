@@ -5,6 +5,8 @@
 #include <string.h> // memset
 #include <unistd.h> // usleep
 
+#include <iostream>
+
 static const UINT32 kFullMessageIDMask = 0x1fffffff;
 
 CtreCanNode::CtreCanNode(UINT8 deviceNumber)

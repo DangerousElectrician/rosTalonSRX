@@ -5,7 +5,6 @@
 //    to connect any CAN interface to the secure Jaguar CAN driver.
 //
 
-#include "can_talon_srx/CANSend.h"
 #include "ros/ros.h"
 
 #ifndef __CANSessionMux_h__
