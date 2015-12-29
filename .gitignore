@@ -4,6 +4,7 @@
 .pydevproject
 .catkin_workspace
 *.swp
+*.pyc
 cmake_install.cmake
 build/
 devel/
