@@ -5,6 +5,7 @@
 #include "FRC_NetworkCommunication/CANSessionMux.h"
 
 #include "can_talon_srx/CANSend.h"
+#include "can_talon_srx/CANRecv.h"
 //#include "std_msgs/String.h"
 
 //#include "std_msgs/String.h"
@@ -14,10 +15,11 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 
 	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
+	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 
 	ros::Rate loop_rate(2); //in hertz
 
-	init_CANSend(CANSend_pub);
+	init_CANSend(CANSend_pub, CANRecv_cli);
 	CanTalonSRX motor (0);
 
 	double batteryV;

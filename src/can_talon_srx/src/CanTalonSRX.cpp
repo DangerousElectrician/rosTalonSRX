@@ -99,11 +99,11 @@
 #define EXPECTED_RESPONSE_TIMEOUT_MS	(200)
 #define GET_STATUS1() CtreCanNode::recMsg<TALON_Status_1_General_10ms_t		> rx = GetRx<TALON_Status_1_General_10ms_t>(STATUS_1	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
 #define GET_STATUS2() CtreCanNode::recMsg<TALON_Status_2_Feedback_20ms_t	> rx = GetRx<TALON_Status_2_Feedback_20ms_t>(STATUS_2	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
-#define GET_STATUS3() CtreCanNode::recMsg<TALON_Status_3_Enc_100ms_t		> rx = GetRx<TALON_Status_3_Enc_100ms_t>(STATUS_3		  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
-#define GET_STATUS4() CtreCanNode::recMsg<TALON_Status_4_AinTempVbat_100ms_t> rx = GetRx<TALON_Status_4_AinTempVbat_100ms_t>(STATUS_4 | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
+#define GET_STATUS3() CtreCanNode::recMsg<TALON_Status_3_Enc_100ms_t		> rx = GetRx<TALON_Status_3_Enc_100ms_t>(STATUS_3	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
+#define GET_STATUS4() CtreCanNode::recMsg<TALON_Status_4_AinTempVbat_100ms_t	> rx = GetRx<TALON_Status_4_AinTempVbat_100ms_t>(STATUS_4 | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
 #define GET_STATUS5() CtreCanNode::recMsg<TALON_Status_5_Startup_OneShot_t	> rx = GetRx<TALON_Status_5_Startup_OneShot_t>(STATUS_5	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
-#define GET_STATUS6() CtreCanNode::recMsg<TALON_Status_6_Eol_t				> rx = GetRx<TALON_Status_6_Eol_t>(STATUS_6				  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
-#define GET_STATUS7() CtreCanNode::recMsg<TALON_Status_7_Debug_200ms_t		> rx = GetRx<TALON_Status_7_Debug_200ms_t>(STATUS_7		  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
+#define GET_STATUS6() CtreCanNode::recMsg<TALON_Status_6_Eol_t			> rx = GetRx<TALON_Status_6_Eol_t>(STATUS_6		  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
+#define GET_STATUS7() CtreCanNode::recMsg<TALON_Status_7_Debug_200ms_t		> rx = GetRx<TALON_Status_7_Debug_200ms_t>(STATUS_7	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
 #define GET_STATUS8() CtreCanNode::recMsg<TALON_Status_8_PulseWid_100ms_t	> rx = GetRx<TALON_Status_8_PulseWid_100ms_t>(STATUS_8	  | GetDeviceNumber(), EXPECTED_RESPONSE_TIMEOUT_MS)
 
 #define PARAM_REQUEST 		0x02041800

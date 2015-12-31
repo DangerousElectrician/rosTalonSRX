@@ -1,6 +1,7 @@
 
 #include "FRC_NetworkCommunication/CANSessionMux.h"
-#include "can_talon_srx/CANSend.h" //don't put this in the header file
+#include "can_talon_srx/CANSend.h" //don't put this in the header file, it causes strange issues when building
+#include "can_talon_srx/CANRecv.h"
 
 #include <iostream>
 #include <vector>
@@ -10,9 +11,11 @@ extern "C"
 {
 #endif  
 	ros::Publisher *CANSend_pub;
-        
-	void init_CANSend(ros::Publisher CANSend_ros_pub) {
+	ros::ServiceClient *CANRecv_cli;
+
+	void init_CANSend(ros::Publisher CANSend_ros_pub, ros::ServiceClient CANRecv_ros_cli) {
 		CANSend_pub = &CANSend_ros_pub;
+		CANRecv_cli = &CANRecv_ros_cli;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
@@ -34,6 +37,13 @@ extern "C"
 
 	void FRC_NetworkCommunication_CANSessionMux_receiveMessage(uint32_t *messageID, uint32_t messageIDMask, uint8_t *data, uint8_t *dataSize, uint32_t *timeStamp, int32_t *status) {
 		std::cout << "recvCAN " << *messageID << std::endl;
+		can_talon_srx::CANRecv srv;
+		srv.request.arbID = *messageID;
+		if(CANRecv_cli->call(srv)) {
+			ROS_INFO("sent CANRecv");
+		} else {
+			ROS_ERROR("no CANRecv service");
+		}
 		data[0] = 0;
 		data[1] = 0;
 		data[2] = 91;

@@ -57,6 +57,7 @@ add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 #   Service1.srv
 #   Service2.srv
 # )
+add_service_files(FILES CANRecv.srv)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
