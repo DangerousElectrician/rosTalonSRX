@@ -101,13 +101,15 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ardu_can_bridge
-#  CATKIN_DEPENDS can_talon_srx roscpp
+  CATKIN_DEPENDS can_talon_srx roscpp
 #  DEPENDS system_lib
 )
 
 ###########
 ## Build ##
 ###########
+
+set( CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}" )
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -128,15 +130,17 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
+add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
+add_dependencies(ardu_can_bridge_node can_talon_srx_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(ardu_can_bridge_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(ardu_can_bridge_node
-#   ${catkin_LIBRARIES}
-# )
+ target_link_libraries(ardu_can_bridge_node
+   ${catkin_LIBRARIES}
+ )
 
 #############
 ## Install ##

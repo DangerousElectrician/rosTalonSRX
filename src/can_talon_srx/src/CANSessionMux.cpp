@@ -41,6 +41,7 @@ extern "C"
 		srv.request.arbID = *messageID;
 		if(CANRecv_cli->call(srv)) {
 			ROS_INFO("sent CANRecv");
+			ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
 		} else {
 			ROS_ERROR("no CANRecv service");
 		}
