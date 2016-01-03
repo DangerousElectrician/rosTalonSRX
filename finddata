@@ -91,3 +91,5 @@ Layout
 Benchmark
 	4 vbox cores: 0m26.699s
 	2 vbox cores: 0m40.103s
+
+ros::spin() blocks
