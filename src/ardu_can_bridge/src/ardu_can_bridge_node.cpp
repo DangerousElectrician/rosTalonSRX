@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "can_talon_srx/CANRecv.h"
+#include "can_talon_srx/CANSend.h"
 #include <vector>
 
 bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
@@ -8,6 +9,7 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 	res.data.size = 8;
 	std::vector<uint8_t> candata(8);
 	candata = {0,0,91,0,0,105,162,0};
+	res.data.bytes = candata;
 	//res.data.bytes[0] = 0;
 	//res.data.bytes[1] = 0;
 	//res.data.bytes[2] = 91;
@@ -20,9 +22,15 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 	return true;
 }
 
+void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
+	ROS_INFO("send arbID: %ld", (long int) msg->data.arbID);
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "ardu_can_bridge");
 	ros::NodeHandle n;
+
+	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 	ros::spin();

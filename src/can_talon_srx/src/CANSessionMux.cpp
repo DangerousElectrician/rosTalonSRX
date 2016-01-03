@@ -42,17 +42,22 @@ extern "C"
 		if(CANRecv_cli->call(srv)) {
 			ROS_INFO("sent CANRecv");
 			ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
+			*dataSize = srv.response.data.size;
+			std::copy(srv.response.data.bytes.begin(), srv.response.data.bytes.begin()+*dataSize, data);
 		} else {
 			ROS_ERROR("no CANRecv service");
 		}
-		data[0] = 0;
-		data[1] = 0;
-		data[2] = 91;
-		data[3] = 0;
-		data[4] = 0;
-		data[5] = 105;
-		data[6] = 162;
-		data[7] = 0;
+		for(int i = 0; i < *dataSize; i++) {
+			std::cout << unsigned(data[i]) << "\t";
+		}
+		//data[0] = 0;
+		//data[1] = 0;
+		//data[2] = 91;
+		//data[3] = 0;
+		//data[4] = 0;
+		//data[5] = 105;
+		//data[6] = 162;
+		//data[7] = 0;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_openStreamSession(uint32_t *sessionHandle, uint32_t messageID, uint32_t messageIDMask, uint32_t maxMessages, int32_t *status) {

@@ -11,7 +11,7 @@ Figure out the functions in CANSessionMux
 build
 	g++ -Wall CANSessionMux.h CANSessionMux.cpp CanTalonSRX.h CanTalonSRX.cpp CtreCanNode.h CtreCanNode.cpp ctre.h test.cpp -std=c++0x
 	catkin_make
-	rosrun can_talon_ros can_talon_ros_node
+	rosrun can_talon_srx can_talon_srx_node
 	see data with
 		rostopic echo /CANSend
 
