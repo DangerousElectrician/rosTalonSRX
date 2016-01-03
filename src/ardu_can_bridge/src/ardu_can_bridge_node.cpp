@@ -4,16 +4,25 @@
 #include "can_talon_srx/CANData.h"
 #include <vector>
 #include <map>
+#include <iterator>
 
 std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
 bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
 	ROS_INFO("request arbID: %ld", (long int)req.arbID);
-	res.data.arbID = req.arbID;
-	res.data.size = 8;
-	std::vector<uint8_t> candata(8);
-	candata = {0,0,91,0,0,105,162,0};
-	res.data.bytes = candata;
+
+	std::map<uint32_t, can_talon_srx::CANData>::iterator i = receivedCAN.find(req.arbID);
+	if(i == receivedCAN.end()) {
+		//no message with requested arbID
+		can_talon_srx::CANData data;
+		data.arbID = req.arbID;
+		data.size = 8;
+		std::vector<uint8_t> candata(8);
+		candata = {0,0,91,0,0,105,162,0};
+		data.bytes = candata;
+		receivedCAN[req.arbID] = data;
+	}
+	res.data = receivedCAN[req.arbID];
 	//res.data.bytes[0] = 0;
 	//res.data.bytes[1] = 0;
 	//res.data.bytes[2] = 91;
