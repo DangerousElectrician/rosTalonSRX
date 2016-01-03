@@ -1,7 +1,11 @@
 #include "ros/ros.h"
 #include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/CANSend.h"
+#include "can_talon_srx/CANData.h"
 #include <vector>
+#include <map>
+
+std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
 bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
 	ROS_INFO("request arbID: %ld", (long int)req.arbID);
