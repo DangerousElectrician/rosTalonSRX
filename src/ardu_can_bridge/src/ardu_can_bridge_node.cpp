@@ -121,7 +121,8 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	ROS_INFO("send arbID: %ld", (long int) msg->data.arbID);
 	write(fd, &msg->data.size, 1);
 	write(fd, "0", 1);	//checksum placeholder
-	write(fd, &msg->data.arbID, 4); //send arbID
+	write(fd, &msg->periodMs, 4);
+	write(fd, &msg->data.arbID, 4); 
 	write(fd, &msg->data.bytes[0], msg->data.size);
 }
 
