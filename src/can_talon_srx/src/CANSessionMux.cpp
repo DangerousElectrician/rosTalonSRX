@@ -43,13 +43,16 @@ extern "C"
 			ROS_INFO("sent CANRecv");
 			ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
 			*dataSize = srv.response.data.size;
+			*status = srv.response.status;
 			std::copy(srv.response.data.bytes.begin(), srv.response.data.bytes.begin()+*dataSize, data);
 		} else {
 			ROS_ERROR("no CANRecv service");
+			*status = 2;
 		}
 		for(int i = 0; i < *dataSize; i++) {
 			std::cout << unsigned(data[i]) << "\t";
 		}
+		std::cout << "status " << *status << std::endl;
 		//data[0] = 0;
 		//data[1] = 0;
 		//data[2] = 91;

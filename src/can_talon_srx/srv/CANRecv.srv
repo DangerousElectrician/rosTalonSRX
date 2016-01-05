@@ -1,3 +1,4 @@
 uint32 arbID
 ---
+uint8 status
 can_talon_srx/CANData data
