@@ -105,15 +105,6 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 	} else {
 		res.data = receivedCAN[req.arbID];
 	}
-	//res.data.bytes[0] = 0;
-	//res.data.bytes[1] = 0;
-	//res.data.bytes[2] = 91;
-	//res.data.bytes[3] = 0;
-	//res.data.bytes[4] = 0;
-	//res.data.bytes[5] = 105;
-	//res.data.bytes[6] = 162;
-	//res.data.bytes[7] = 0;
-	//ROS_INFO("sending back response: [%ld]", (long int)res.sum);
 	return true;
 }
 
