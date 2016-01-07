@@ -58,33 +58,31 @@ int open_port(void) {
 	return (fd);
 }
 
-ssize_t serialread(int fd, void *buf, size_t count) {
-	// Initialize file descriptor sets
-	fd_set read_fds, write_fds, except_fds;
-	FD_ZERO(&read_fds);
-	FD_ZERO(&write_fds);
-	FD_ZERO(&except_fds);
-	FD_SET(fd, &read_fds);
+ssize_t serialread(int fd, void *buf, size_t count, long int timeoutus) {
+        // Initialize file descriptor sets
+        fd_set read_fds, write_fds, except_fds;
+        FD_ZERO(&read_fds);
+        FD_ZERO(&write_fds);
+        FD_ZERO(&except_fds);
+        FD_SET(fd, &read_fds);
 
-	// Set timeout to 1.0 seconds
-	struct timeval timeout;
-	timeout.tv_sec = 1;
-	timeout.tv_usec = 0;
+        // Set timeout to 1.0 seconds
+        struct timeval timeout;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = timeoutus;
 
-	// Wait for input to become ready or until the time out; the first parameter is
-	// 1 more than the largest file descriptor in any of the sets
-	if (select(fd + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1) {
-		// fd is ready for reading
-		return read(fd, buf, count);
-	}
-	else {
-		// timeout or error
-		std::cout << "timeout" << std::endl;
-		return -1;
-	}
+        // Wait for input to become ready or until the time out; the first parameter is
+        // 1 more than the largest file descriptor in any of the sets
+        if (select(fd + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1) {
+                // fd is ready for reading
+                return read(fd, buf, count);
+        }
+        else {
+                // timeout or error
+                std::cout << "timeout " << std::flush;
+                return -1;
+        }
 }
-
-
 
 bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
 	ROS_INFO("request arbID: %ld", (long int)req.arbID);
@@ -111,11 +109,13 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	ROS_INFO("send arbID: %ld", (long int) msg->data.arbID);
 	write(fd, &msg->data.size, 1);
-	write(fd, "0", 1);	//checksum placeholder
+	write(fd, "*", 1);	//checksum placeholder
 	write(fd, &msg->periodMs, 4);
 	write(fd, &msg->data.arbID, 4); 
 	write(fd, &msg->data.bytes[0], msg->data.size);
 }
+
+#define DATTIME 0
 
 int main(int argc, char **argv) {
 	
@@ -128,7 +128,34 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
-	ros::spin();
+
+	unsigned int buf;
+        unsigned char size;
+        unsigned char packetcount;
+        unsigned char checksum;
+        unsigned int arbID;
+        unsigned char bytes[8];
+
+	while(ros::ok()) {
+		write(fd, " ", 1);
+                if(serialread(fd, &size, 1, 15000) != -1 && size <= 8) {
+                        if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
+                                if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
+                                        if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
+                                                if(serialread(fd, &bytes, size, DATTIME) != -1 ) {
+                                                        std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
+                                                        for(int j = 0; j < size; j++) {
+                                                                std::cout << unsigned(bytes[j]) << " ";
+                                                        }
+                                                        std::cout << std::endl;
+                                                } else {std::cout << "byte err " << std::endl;}
+                                        } else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
+                                } else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}
+                        } else {std::cout << "pcnt err " << std::endl;}
+                } else {std::cout << "size err " << unsigned(size) << std::endl;}
+
+		ros::spinOnce();
+	}
 
 	return 0;
 }

@@ -28,9 +28,9 @@ int main(int argc, char **argv) {
 		motor.GetBatteryV(batteryV);
 
 		std::cout << "battV " << batteryV << std::endl;
-		motor.Set(.1);
+		//motor.Set(.1);
 
-		motor.Set(1);
+		//motor.Set(1);
 		
 		ros::spinOnce();
 		loop_rate.sleep();
