@@ -95,11 +95,11 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 		res.status = 1; //status is 1 if there is no CAN frame with requested arbID
 
 		//below is testing data
-		data.arbID = req.arbID;
-		data.size = 8;
-		std::vector<uint8_t> candata{0,0,91,0,0,105,162,0};
-		data.bytes = candata;
-		receivedCAN[req.arbID] = data;
+		//data.arbID = req.arbID;
+		//data.size = 8;
+		//std::vector<uint8_t> candata{0,0,91,0,0,105,162,0};
+		//data.bytes = candata;
+		//receivedCAN[req.arbID] = data;
 	} else {
 		res.data = receivedCAN[req.arbID];
 	}
@@ -138,16 +138,26 @@ int main(int argc, char **argv) {
 
 	while(ros::ok()) {
 		write(fd, " ", 1);
-                if(serialread(fd, &size, 1, 15000) != -1 && size <= 8) {
+                if(serialread(fd, &size, 1, 100000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
                                 if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
                                         if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
                                                 if(serialread(fd, &bytes, size, DATTIME) != -1 ) {
+
                                                         std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
                                                         for(int j = 0; j < size; j++) {
                                                                 std::cout << unsigned(bytes[j]) << " ";
                                                         }
                                                         std::cout << std::endl;
+
+
+							can_talon_srx::CANData data;
+							data.arbID = arbID;
+							data.size = size;
+							data.bytes = std::vector<uint8_t> (bytes, bytes + size);
+
+							receivedCAN[arbID] = data;
+
                                                 } else {std::cout << "byte err " << std::endl;}
                                         } else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
                                 } else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}

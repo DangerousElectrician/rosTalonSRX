@@ -23,11 +23,17 @@ int main(int argc, char **argv) {
 	CanTalonSRX motor (0);
 
 	double batteryV;
+	int limitswitchfor;
+	int sensorpos;
 	while(ros::ok()) {
 		
 		motor.GetBatteryV(batteryV);
+		motor.GetLimitSwitchClosedFor(limitswitchfor);
+		motor.GetAnalogInWithOv(sensorpos);
 
 		std::cout << "battV " << batteryV << std::endl;
+		std::cout << "limitswitchfor " << limitswitchfor << std::endl;
+		std::cout << "sensorpos " << sensorpos << std::endl;
 		//motor.Set(.1);
 
 		//motor.Set(1);
