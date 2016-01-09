@@ -15,7 +15,7 @@
 #include <termios.h> /* POSIX terminal control definitions */
 
 #define BAUD B115200
-#define PORT "/dev/ttyUSB0"
+#define PORT "/dev/ttyACM0"
 
 std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
@@ -135,7 +135,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	write(fd, &msg->data.bytes[0], msg->data.size);
 }
 
-#define DATTIME 0
+#define DATTIME 10000
 
 int main(int argc, char **argv) {
 	
@@ -156,7 +156,9 @@ int main(int argc, char **argv) {
         unsigned int arbID;
         unsigned char bytes[8];
 
-	ros::Rate r(4); // 10 hz
+	ros::Rate r(1000); // 10 hz
+
+	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
 	while(ros::ok()) {
 	//write(fd, "l", 1);
