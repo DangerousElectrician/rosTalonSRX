@@ -61,22 +61,38 @@ void loop()
           
         if(keepalive)
         { 
-          keepalive--;
+          keepalive--;  
           Serial.write(len);
           Serial.write(packetcount);
           Serial.write(checksum);
-          Serial.write(bytecon, 4);
+          Serial.write(bytecon, 4); //canID after shuffled into an array
           Serial.write(buf, len);
         }
-        
-        
     }
-
+          
+          keepalive = 3;
     if(Serial.available())
     {
       command = Serial.read();
+      switch(command)
+      {
+        case 'd':
+          keepalive = 3;
+          Serial.print("j");
+          break;
+          
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+          
+          break;
+      }
     }
-    if(Serial.read() == ' ') keepalive = 3;
 }
 
 /*********************************************************************************************************

@@ -15,7 +15,7 @@
 #include <termios.h> /* POSIX terminal control definitions */
 
 #define BAUD B115200
-#define PORT "/dev/ttyS0"
+#define PORT "/dev/ttyUSB0"
 
 std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
@@ -50,8 +50,28 @@ int open_port(void) {
 	cfsetispeed(&options, BAUD); //Set the baud rates
 	cfsetospeed(&options, BAUD);
 
-	options.c_cflag |= (CLOCAL | CREAD); //Enable the receiver and set local mode...
-	//options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+	//options.c_cflag |= (CLOCAL | CREAD); //Enable the receiver and set local mode...
+	//options.c_iflag &= ~(IXON | IXOFF | IXANY); //disable software flow control
+	//options.c_oflag &= ~OPOST;
+	//options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); //enable raw input
+
+	//cfmakeraw(&options);
+
+	// 8N1
+	options.c_cflag &= ~PARENB;
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE;
+	options.c_cflag |= CS8;
+	// no flow control
+	options.c_cflag &= ~CRTSCTS;
+
+	//toptions.c_cflag &= ~HUPCL; // disable hang-up-on-close to avoid reset
+
+	options.c_cflag |= CREAD | CLOCAL;  // turn on READ & ignore ctrl lines
+	options.c_iflag &= ~(IXON | IXOFF | IXANY); // turn off s/w flow ctrl
+
+	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make raw
+	options.c_oflag &= ~OPOST; // make raw
 
 	tcsetattr(fd, TCSANOW, &options); //Set the new options for the port...
 
@@ -136,8 +156,11 @@ int main(int argc, char **argv) {
         unsigned int arbID;
         unsigned char bytes[8];
 
+	ros::Rate r(4); // 10 hz
+
 	while(ros::ok()) {
-		write(fd, " ", 1);
+	//write(fd, "l", 1);
+		write(fd, "d", 1);
                 if(serialread(fd, &size, 1, 100000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
                                 if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
@@ -164,6 +187,7 @@ int main(int argc, char **argv) {
                         } else {std::cout << "pcnt err " << std::endl;}
                 } else {std::cout << "size err " << unsigned(size) << std::endl;}
 
+		//r.sleep();
 		ros::spinOnce();
 	}
 
