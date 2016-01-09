@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 		std::cout << "battV " << batteryV << std::endl;
 		std::cout << "limitswitchfor " << limitswitchfor << std::endl;
 		std::cout << "sensorpos " << sensorpos << std::endl;
-		//motor.Set(.1);
+		motor.Set(.1);
 
 		//motor.Set(1);
 		

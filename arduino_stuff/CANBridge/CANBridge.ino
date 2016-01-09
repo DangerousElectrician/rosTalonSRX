@@ -35,46 +35,84 @@ START_INIT:
 }
 
 struct CANData {
-  unsigned char len = 0;
-  unsigned char buf[8];
-  unsigned char checksum = 42;
-  unsigned char packetcount = 0;
+  unsigned char size = 0;
+  unsigned char bytes[8];
   INT32U canId;
 };
 
+struct RXData {
+  CANData data;
+  unsigned char checksum = 42;
+  unsigned char packetcount = 0;
+};
 
-struct CANData rxData;
-struct CANData txData;
+struct TXData {
+  CANData data;
+  unsigned char checksum = 42;
+  unsigned char packetcount = 0;
+  long periodMs = -1;
+  unsigned char index = 0;
+};
+  
+struct TXCANData {
+  CANData data;
+  long periodMs = -1;
+};
+TXCANData txarr[50];
+
+RXData rxData;
+TXData txData;
 
 unsigned char bytecon[8];
+char bytecon2[8];
 
 unsigned char keepalive = 0;
+unsigned char sendmessages = 0;
 unsigned char command = 0;
+
+int j = 0;
 
 void loop()
 {
 
     if(CAN_MSGAVAIL == CAN.checkReceive())            // check if data coming
     {
-        CAN.readMsgBuf(&rxData.len, rxData.buf);    // read data,  len: data length, buf: data buf
+        CAN.readMsgBuf(&rxData.data.size, rxData.data.bytes);  
 
-        rxData.canId = CAN.getCanId();
+        rxData.data.canId = CAN.getCanId();
         rxData.packetcount++;
 
-        bytecon[0] = rxData.canId & BYTEMASK;
-        bytecon[1] = (rxData.canId >> 8) & BYTEMASK;
-        bytecon[2] = (rxData.canId >> 16) & BYTEMASK;
-        bytecon[3] = (rxData.canId >> 24) & BYTEMASK;
+        bytecon[0] = rxData.data.canId & BYTEMASK;
+        bytecon[1] = (rxData.data.canId >> 8) & BYTEMASK;
+        bytecon[2] = (rxData.data.canId >> 16) & BYTEMASK;
+        bytecon[3] = (rxData.data.canId >> 24) & BYTEMASK;
           
-        if(keepalive)
+        if(sendmessages)
         { 
-          keepalive--;  
-          Serial.write(rxData.len);
+          sendmessages--;  
+          Serial.write(rxData.data.size);
           Serial.write(rxData.packetcount);
           Serial.write(rxData.checksum);
           Serial.write(bytecon, 4); //canID after shuffled into an array
-          Serial.write(rxData.buf, rxData.len);
+          Serial.write(rxData.data.bytes, rxData.data.size);
         }
+    }
+    
+    if(keepalive)
+    {
+      for(j = 0; j < 50; j++)
+      {
+        if(txarr[j].periodMs > 0)
+        {
+          CAN.sendMsgBuf(txarr[j].data.canId, 1, txarr[j].data.size, txarr[j].data.bytes);
+        }
+        else if(txarr[j].periodMs == 0)
+        {
+          CAN.sendMsgBuf(txarr[j].data.canId, 1, txarr[j].data.size, txarr[j].data.bytes);
+          txarr[j].periodMs = -1;
+        }
+      }
+      keepalive--;
     }
           
     if(Serial.available())
@@ -83,7 +121,8 @@ void loop()
       switch(command)
       {
         case 'd':
-          keepalive = 1;
+          sendmessages = 1;
+          keepalive = 255;
           break;
 
         case 0:
@@ -95,8 +134,21 @@ void loop()
         case 6:
         case 7:
         case 8:
-          txData.len = command;
+          txData.data.size = command;
+          if(txData.data.size > 8) break;
           txData.checksum = Serial.read();
+          if(txData.checksum != 42) break;
+          txData.index = Serial.read();
+          Serial.readBytes(bytecon2, 4);
+          txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] >> 8) | ((unsigned long)bytecon2[2] >> 16) | ((unsigned long)bytecon2[3] >> 24);
+          Serial.readBytes(bytecon2, 4);
+          txData.data.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] >> 8) | ((unsigned long)bytecon2[2] >> 16) | ((unsigned long)bytecon2[3] >> 24);
+          Serial.readBytes(bytecon2, txData.data.size);
+          for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
+          
+          txarr[txData.index].data = txData.data;
+          txarr[txData.index].periodMs = txData.periodMs;
+          keepalive = 255;
           break;
       }
     }
