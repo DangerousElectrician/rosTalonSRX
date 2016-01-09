@@ -34,12 +34,17 @@ START_INIT:
     CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
 }
 
-unsigned char len = 0;
-unsigned char buf[8];
+struct CANData {
+  unsigned char len = 0;
+  unsigned char buf[8];
+  unsigned char checksum = 42;
+  unsigned char packetcount = 0;
+  INT32U canId;
+};
+
+struct CANData rxData;
+
 unsigned char bytecon[8];
-unsigned char checksum = 42;
-unsigned char packetcount = 0;
-INT32U canId;
 
 unsigned char keepalive = 0;
 unsigned char command = 0;
@@ -49,38 +54,37 @@ void loop()
 
     if(CAN_MSGAVAIL == CAN.checkReceive())            // check if data coming
     {
-        CAN.readMsgBuf(&len, buf);    // read data,  len: data length, buf: data buf
+        CAN.readMsgBuf(&rxData.len, rxData.buf);    // read data,  len: data length, buf: data buf
 
-        canId = CAN.getCanId();
-        packetcount++;
+        rxData.canId = CAN.getCanId();
+        rxData.packetcount++;
 
-        bytecon[0] = canId & BYTEMASK;
-        bytecon[1] = (canId >> 8) & BYTEMASK;
-        bytecon[2] = (canId >> 16) & BYTEMASK;
-        bytecon[3] = (canId >> 24) & BYTEMASK;
+        bytecon[0] = rxData.canId & BYTEMASK;
+        bytecon[1] = (rxData.canId >> 8) & BYTEMASK;
+        bytecon[2] = (rxData.canId >> 16) & BYTEMASK;
+        bytecon[3] = (rxData.canId >> 24) & BYTEMASK;
           
         if(keepalive)
         { 
           keepalive--;  
-          Serial.write(len);
-          Serial.write(packetcount);
-          Serial.write(checksum);
+          Serial.write(rxData.len);
+          Serial.write(rxData.packetcount);
+          Serial.write(rxData.checksum);
           Serial.write(bytecon, 4); //canID after shuffled into an array
-          Serial.write(buf, len);
+          Serial.write(rxData.buf, rxData.len);
         }
     }
           
-          keepalive = 3;
     if(Serial.available())
     {
       command = Serial.read();
       switch(command)
       {
         case 'd':
-          keepalive = 3;
-          Serial.print("j");
+          keepalive = 1;
           break;
-          
+
+        case 0:
         case 1:
         case 2:
         case 3:
