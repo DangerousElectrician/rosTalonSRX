@@ -42,7 +42,9 @@ struct CANData {
   INT32U canId;
 };
 
+
 struct CANData rxData;
+struct CANData txData;
 
 unsigned char bytecon[8];
 
@@ -93,7 +95,8 @@ void loop()
         case 6:
         case 7:
         case 8:
-          
+          txData.len = command;
+          txData.checksum = Serial.read();
           break;
       }
     }

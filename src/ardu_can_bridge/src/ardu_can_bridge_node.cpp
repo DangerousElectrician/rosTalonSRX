@@ -19,6 +19,14 @@
 
 std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
+struct txCANData {
+	can_talon_srx::CANData data;
+	uint8_t checksum = 42;
+	uint8_t index;
+	int32_t periodMs = -1;
+};
+
+std::map<uint32_t, txCANData> transmittingCAN;
 
 /*
  * 'open_port()' - Open serial port 1.
@@ -128,11 +136,17 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	ROS_INFO("send arbID: %ld", (long int) msg->data.arbID);
-	write(fd, &msg->data.size, 1);
-	write(fd, "*", 1);	//checksum placeholder
-	write(fd, &msg->periodMs, 4);
-	write(fd, &msg->data.arbID, 4); 
-	write(fd, &msg->data.bytes[0], msg->data.size);
+	txCANData txdata;
+	txdata.data = msg->data;
+	txdata.periodMs = msg->periodMs;
+	
+
+	write(fd, &txdata.data.size, 1);
+	write(fd, &txdata.checksum, 1);	//checksum placeholder
+	write(fd, &txdata.index, 1);
+	write(fd, &txdata.periodMs, 4);
+	write(fd, &txdata.data.arbID, 4); 
+	write(fd, &txdata.data.bytes[0], msg->data.size);
 }
 
 #define DATTIME 10000
