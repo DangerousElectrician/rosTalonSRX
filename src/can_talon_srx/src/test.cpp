@@ -25,16 +25,20 @@ int main(int argc, char **argv) {
 	double batteryV;
 	int limitswitchfor;
 	int sensorpos;
+	int fsoftenable;
 	while(ros::ok()) {
 		
 		motor.GetBatteryV(batteryV);
 		motor.GetLimitSwitchClosedFor(limitswitchfor);
 		motor.GetAnalogInWithOv(sensorpos);
+		motor.SetForwardSoftEnable(1);
+		motor.GetForwardSoftEnable(fsoftenable);
 
-		std::cout << "battV " << batteryV << std::endl;
-		std::cout << "limitswitchfor " << limitswitchfor << std::endl;
-		std::cout << "sensorpos " << sensorpos << std::endl;
-		motor.Set(.1);
+		std::cout << "BatteryV\t" << batteryV << std::endl;
+		std::cout << "limitswitchfor\t" << limitswitchfor << std::endl;
+		std::cout << "sensorpos\t" << sensorpos << std::endl;
+		std::cout << "fsoftenable\t" << fsoftenable << std::endl;
+		//motor.Set(.1);
 
 		//motor.Set(1);
 		

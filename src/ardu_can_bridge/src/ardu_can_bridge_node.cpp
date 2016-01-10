@@ -22,7 +22,7 @@ std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 struct txCANData {
 	can_talon_srx::CANData data;
 	uint8_t checksum = 42;
-	uint8_t index;
+	uint8_t index = 0;
 	int32_t periodMs = -1;
 };
 
@@ -135,11 +135,12 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 }
 
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
-	ROS_INFO("send arbID: %ld", (long int) msg->data.arbID);
 	txCANData txdata;
 	txdata.data = msg->data;
 	txdata.periodMs = msg->periodMs;
 	
+	//ROS_INFO("send arbID: %ld", (long int) txdata.data.arbID);
+	ROS_INFO("send size: %ld", (long int) txdata.data.size);
 
 	write(fd, &txdata.data.size, 1);
 	write(fd, &txdata.checksum, 1);	//checksum placeholder

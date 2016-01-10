@@ -136,19 +136,36 @@ void loop()
         case 8:
           txData.data.size = command;
           if(txData.data.size > 8) break;
+          
           txData.checksum = Serial.read();
           if(txData.checksum != 42) break;
+          
           txData.index = Serial.read();
+          
           Serial.readBytes(bytecon2, 4);
           txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] >> 8) | ((unsigned long)bytecon2[2] >> 16) | ((unsigned long)bytecon2[3] >> 24);
-          Serial.readBytes(bytecon2, 4);
-          txData.data.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] >> 8) | ((unsigned long)bytecon2[2] >> 16) | ((unsigned long)bytecon2[3] >> 24);
+          
+          //Serial.readBytes(bytecon2, 4);
+          //txData.data.canId = bytecon2[0];// | ((unsigned long)bytecon2[1] >> 8) | ((unsigned long)bytecon2[2] >> 16) | ((unsigned long)bytecon2[3] >> 24);
+          txData.data.canId = Serial.read();
+          Serial.read();
+          Serial.read();
+          Serial.read();
+          
           Serial.readBytes(bytecon2, txData.data.size);
           for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
           
-          txarr[txData.index].data = txData.data;
-          txarr[txData.index].periodMs = txData.periodMs;
+          txarr[0].data.size = txData.data.size;
+          txarr[0].periodMs = txData.periodMs;
+          txarr[0].data.canId = txData.data.canId;
           keepalive = 255;
+          Serial.println();
+          Serial.print("debug ");
+          Serial.println(txarr[0].data.size);
+          break;
+          
+        case 'r':
+          Serial.println(txarr[0].data.size);
           break;
       }
     }
