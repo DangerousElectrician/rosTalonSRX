@@ -36,18 +36,18 @@ std::map<uint32_t, txCANData> transmittingCAN;
 
 int fd = 0;
 
-int open_port(void) {
+int open_port(std::string dev) {
 	int fd; /* File descriptor for the port */
 
 
-	fd = open(PORT, O_RDWR | O_NOCTTY | O_NDELAY);
+	fd = open(dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1)
 	{
 		/*
 		* Could not open the port.
 		*/
 
-		perror("open_port: Unable to open /dev/ttyS0 - ");
+		ROS_ERROR("open_port: Unable to open %s", dev.c_str());
 	}
 	else fcntl(fd, F_SETFL, 0);
 
@@ -153,12 +153,16 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 #define DATTIME 10000
 
 int main(int argc, char **argv) {
-	
-	fd = open_port();
-	uint8_t serbuf[14];
+
 
 	ros::init(argc, argv, "ardu_can_bridge");
 	ros::NodeHandle n;
+	ros::NodeHandle nh("~");
+
+	std::string device = "/dev/ttyACM0";
+	nh.getParam("port", device);
+	fd = open_port(device);
+	uint8_t serbuf[14];
 
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
