@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
 
 	while(ros::ok()) {
 		write(fd, "d", 1);
-                if(serialread(fd, &size, 1, 10000) != -1 && size <= 8) {
+                if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
                                 if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
                                         if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
