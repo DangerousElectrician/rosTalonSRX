@@ -8,7 +8,7 @@
 #include <iostream>
 
 #define BAUD B115200
-#define PORT "/dev/ttyUSB0"
+#define PORT "/dev/ttyACM0"
 
 /*
  * 'open_port()' - Open serial port 1.
@@ -27,7 +27,7 @@ int open_port(void) {
 		* Could not open the port.
 		*/
 
-		perror("open_port: Unable to open /dev/ttyf1 - ");
+		perror("open_port: Unable to open port");
 	}
 	else fcntl(fd, F_SETFL, 0);
 
@@ -83,6 +83,7 @@ int main () {
 	unsigned int arbID;
 	unsigned char bytes[8];
 
+	sleep(2);
 	for(int i = 0; i < 127; ) {
 		//write(fd, "1234567890", 10);
 		//std::cout << read(fd, &buf, 16) << ' ';

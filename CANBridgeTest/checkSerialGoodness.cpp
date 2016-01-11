@@ -8,7 +8,7 @@
 #include <iostream>
 
 #define BAUD B115200
-#define PORT "/dev/ttyUSB0"
+#define PORT "/dev/ttyACM0"
 
 /*
  * 'open_port()' - Open serial port 1.
@@ -91,30 +91,19 @@ ssize_t serialread(int fd, void *buf, size_t count) {
 int main () {
 	int fd = open_port();
 
-	char buf[11];
-	//unsigned int buf;
-	unsigned char size;
-	unsigned char checksum;
-	int periodMs;
-	unsigned int arbID;
-	unsigned char bytes[8];
+	unsigned char buf;
 
 	unsigned char count = 0;
 
+	sleep(2);
 	for(int i = 0; i < 127; ) {
-		//write(fd, "1234567890", 10);
-		//std::cout << read(fd, &buf, 16) << ' ';
-		//std::cout << "cycle" << std::endl;
 
 		write(fd, &count, 1);
-		count++;
 		if(serialread(fd, &buf, 1) != -1) {
-
-			buf[10] = 0;
-			for(int j = 0; j < 1; j++) {
-				std::cout << ((int)(buf[j]) & 255) << " " << std::flush;
-			}
+			std::cout << (int)buf << " " << std::flush;
+			if(buf != count) std::cout << "oops" << std::endl;
 		}
+		count++;
 
 	}
 }
