@@ -39,10 +39,10 @@ int main(int argc, char **argv) {
 		std::cout << "sensorpos\t" << sensorpos << std::endl;
 		std::cout << "fsoftenable\t" << fsoftenable << std::endl;
 		motor.Set(.1);
-
-		//motor.Set(1);
-		
+		ros::Duration(1).sleep();
+		motor.Set(.3);
+		ros::Duration(1).sleep();
 		ros::spinOnce();
-		loop_rate.sleep();
+		//loop_rate.sleep();
 	}
 }

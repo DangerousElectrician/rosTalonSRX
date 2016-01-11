@@ -150,7 +150,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	write(fd, &txdata.data.bytes[0], msg->data.size);
 }
 
-#define DATTIME 10000
+#define DATTIME 0
 
 int main(int argc, char **argv) {
 
@@ -175,14 +175,13 @@ int main(int argc, char **argv) {
         unsigned int arbID;
         unsigned char bytes[8];
 
-	ros::Rate r(1000); // 10 hz
+	ros::Rate r(100);
 
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
 	while(ros::ok()) {
-	//write(fd, "l", 1);
 		write(fd, "d", 1);
-                if(serialread(fd, &size, 1, 100000) != -1 && size <= 8) {
+                if(serialread(fd, &size, 1, 10000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
                                 if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
                                         if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {

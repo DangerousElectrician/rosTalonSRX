@@ -129,7 +129,7 @@ void loop()
         case 5:
         case 6:
         case 7:
-        case 8:{
+        case 8:
           txData.data.size = command;
           if(txData.data.size > 8) break;
           
@@ -147,39 +147,40 @@ void loop()
           Serial.readBytes(bytecon2, 4);
           txData.data.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
 
+          
+          while(Serial.available() < txData.data.size);
           Serial.readBytes(bytecon2, txData.data.size);
           for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
           
-          txarr[0].data.size = txData.data.size;
-          txarr[0].periodMs = txData.periodMs;
-          txarr[0].data.canId = txData.data.canId;
-          for(j = 0; j< txData.data.size; j++) txarr[0].data.bytes[j] = txData.data.bytes[j];
+          txarr[txData.index].data.size = txData.data.size;
+          txarr[txData.index].periodMs = txData.periodMs;
+          txarr[txData.index].data.canId = txData.data.canId;
+          for(j = 0; j< txData.data.size; j++) txarr[txData.index].data.bytes[j] = txData.data.bytes[j];
           
           keepalive = 255;
-          Serial.println();
-          Serial.print("size:\t");
-          Serial.println(txarr[0].data.size);
-          Serial.print("index:\t");
-          Serial.println(txData.index);
-          Serial.print("chksum:\t");
-          Serial.println(txData.checksum);
-          Serial.print("period:\t");
-          Serial.println(txarr[0].periodMs);
-          Serial.print("arbID:\t");
-          Serial.println(txarr[0].data.canId);
           
-          Serial.print("bytes:\t");
-          for(j= 0 ; j< txarr[0].data.size; j++)
-          {
-            Serial.print(txData.data.bytes[j]);
-            Serial.print("\t");
-          }
-          Serial.println();
-          }
-          break;
+          #ifdef DEBUG
+            Serial.println();
+            Serial.print("size:\t");
+            Serial.println(txarr[txData.index].data.size);
+            Serial.print("index:\t");
+            Serial.println(txData.index);
+            Serial.print("chksum:\t");
+            Serial.println(txData.checksum);
+            Serial.print("period:\t");
+            Serial.println(txarr[txData.index].periodMs);
+            Serial.print("arbID:\t");
+            Serial.println(txarr[txData.index].data.canId);
+            
+            Serial.print("bytes:\t");
+            for(j= 0 ; j< txarr[txData.index].data.size; j++)
+            {
+              Serial.print(txData.data.bytes[j]);
+              Serial.print("\t");
+            }
+            Serial.println();
+          #endif
           
-        case 'r':
-          Serial.println(txarr[0].data.size);
           break;
       }
     }
