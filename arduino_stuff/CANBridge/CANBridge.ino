@@ -159,6 +159,11 @@ void loop()
           Serial.readBytes(bytecon2, txData.data.size);
           for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
           
+          if(txData.periodMs == 0) 
+          {
+            CAN.sendMsgBuf(txData.data.canId, 1, txData.data.size, txData.data.bytes);
+          }
+          
           txarr[txData.index].data.size = txData.data.size;
           txarr[txData.index].periodMs = txData.periodMs;
           txarr[txData.index].data.canId = txData.data.canId;

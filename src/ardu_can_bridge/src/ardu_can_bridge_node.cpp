@@ -147,6 +147,10 @@ int lockIndex() {
 	return -1;
 }
 
+void releaseIndex(int index) {
+	usedIndex[index] = 0;
+}
+
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	txCANData txdata;
 	txdata.data = msg->data;
@@ -158,11 +162,20 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	std::map<uint32_t, txCANData>::iterator i = transmittingCAN.find(txdata.data.arbID);
 	if( i == transmittingCAN.end() ) {
 		txdata.index = lockIndex();
+		if(txdata.index == -1) {
+			ROS_ERROR("Cannot transmit periodic CAN message");
+			return ;
+		}
 		transmittingCAN[txdata.data.arbID] = txdata;
 	} else {
 		txCANData oldData = transmittingCAN[txdata.data.arbID];
 		txdata.index = oldData.index;
-		transmittingCAN[txdata.data.arbID] = txdata;
+		if(txdata.periodMs > 0) {
+			transmittingCAN[txdata.data.arbID] = txdata;
+		} else {
+			releaseIndex(txdata.index);
+			transmittingCAN.erase(txdata.data.arbID);
+		}
 	}
 
 	write(fd, &txdata.data.size, 1);

@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
 
 	init_CANSend(CANSend_pub, CANRecv_cli);
 	CanTalonSRX motor (1);
+	CanTalonSRX motor2 (2);
 
 	double batteryV;
 	int limitswitchfor;
@@ -28,9 +29,11 @@ int main(int argc, char **argv) {
 	int fsoftenable;
 	while(ros::ok()) {
 		
+		motor.Set(.3);
+		motor2.Set(.3);
 		motor.GetBatteryV(batteryV);
 		motor.GetLimitSwitchClosedFor(limitswitchfor);
-		motor.GetAnalogInWithOv(sensorpos);
+		motor2.GetAnalogInWithOv(sensorpos);
 		//motor.SetForwardSoftEnable(1);
 		//motor.GetForwardSoftEnable(fsoftenable);
 
@@ -38,10 +41,10 @@ int main(int argc, char **argv) {
 		std::cout << "limitswitchfor\t" << limitswitchfor << std::endl;
 		std::cout << "sensorpos\t" << sensorpos << std::endl;
 		std::cout << "fsoftenable\t" << fsoftenable << std::endl;
-		motor.Set(.1);
-		ros::Duration(1).sleep();
-		motor.Set(.3);
-		ros::Duration(1).sleep();
+		//motor.Set(.1);
+		//ros::Duration(1).sleep();
+		//motor.Set(.3);
+		//ros::Duration(1).sleep();
 		ros::spinOnce();
 		//loop_rate.sleep();
 	}
