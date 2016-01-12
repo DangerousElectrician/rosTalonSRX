@@ -110,6 +110,13 @@ void loop()
       }
       keepalive--;
     }
+    else
+    {
+      for(j = 0; j < 50; j++)
+      {
+        txarr[j].periodMs = -1;
+      }
+    }
           
     if(Serial.available())
     {
