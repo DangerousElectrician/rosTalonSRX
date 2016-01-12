@@ -27,6 +27,7 @@ struct txCANData {
 };
 
 std::map<uint32_t, txCANData> transmittingCAN;
+char usedIndex[50] = {0};
 
 /*
  * 'open_port()' - Open serial port 1.
@@ -134,6 +135,18 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 	return true;
 }
 
+int lockIndex() {
+	for(int i = 0; i < sizeof(usedIndex); i++) {
+		if(usedIndex[i]) {
+			
+		} else {
+			usedIndex[i] = 1;
+			return i;
+		}
+	}
+	return -1;
+}
+
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	txCANData txdata;
 	txdata.data = msg->data;
@@ -141,6 +154,16 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	
 	//ROS_INFO("send arbID: %ld", (long int) txdata.data.arbID);
 	ROS_INFO("send size: %ld", (long int) txdata.data.size);
+
+	std::map<uint32_t, txCANData>::iterator i = transmittingCAN.find(txdata.data.arbID);
+	if( i == transmittingCAN.end() ) {
+		txdata.index = lockIndex();
+		transmittingCAN[txdata.data.arbID] = txdata;
+	} else {
+		txCANData oldData = transmittingCAN[txdata.data.arbID];
+		txdata.index = oldData.index;
+		transmittingCAN[txdata.data.arbID] = txdata;
+	}
 
 	write(fd, &txdata.data.size, 1);
 	write(fd, &txdata.checksum, 1);	//checksum placeholder
