@@ -64,7 +64,9 @@ RXData rxData;
 TXData txData;
 
 unsigned char bytecon[8];
-char bytecon2[8];
+unsigned char bytecon2[8];
+
+char serInBuf[19];
 
 unsigned char keepalive = 0;
 unsigned char sendmessages = 0;
@@ -92,7 +94,7 @@ void loop()
           sendmessages--;  
           Serial.write(rxData.data.size);
           Serial.write(rxData.packetcount);
-          Serial.write(bytecon, 4); //canID after shuffled into an array
+          Serial.write((unsigned char*)&rxData.data.canId, 4); //canID after shuffled into an array
           Serial.write(rxData.data.bytes, rxData.data.size);
           Serial.write(rxData.checksum);
         }
@@ -136,24 +138,28 @@ void loop()
         case 5:
         case 6:
         case 7:
-        case 8:
-          txData.data.size = command;
-          if(txData.data.size > 8) break;
+        case 8: // 1:size 1:index 4:period 4:arbID 8:data 1:checksum  19 total
+//          serInBuf[0] = command;
+//          while(Serial.available() < 18);
+//          Serial.readBytes((char*)&rxData, 18);
           
+          txData.data.size = command;
+          
+          if(txData.data.size > 8) break;
           
           txData.index = Serial.read();
           
-          while(Serial.available() < 4);        
-          Serial.readBytes(bytecon2, 4);
+          while(Serial.available() < 4);
+          Serial.readBytes((char*)&bytecon2[0], 4);
           txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
 
           while(Serial.available() < 4);
-          Serial.readBytes(bytecon2, 4);
+          Serial.readBytes((char*)bytecon2, 4);
           txData.data.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
 
           
           while(Serial.available() < txData.data.size);
-          Serial.readBytes(bytecon2, txData.data.size);
+          Serial.readBytes((char*)bytecon2, txData.data.size);
           for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
           
           txData.checksum = Serial.read();
