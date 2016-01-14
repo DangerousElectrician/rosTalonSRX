@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	while(ros::ok()) {
 		
 		motor.Set(.3);
-//		motor2.Set(.3);
+		//motor2.Set(.3);
 		motor.GetBatteryV(batteryV);
 		motor.GetAppliedThrottle(throttle);
 		motor.GetLimitSwitchClosedFor(limitswitchfor);

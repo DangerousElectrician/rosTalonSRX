@@ -148,10 +148,12 @@ void loop()
           //txData.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
           
           while(Serial.available() < txData.size);
-          Serial.readBytes((char*)bytecon2, txData.size);
-          for(j = 0; j< txData.size; j++)  txData.bytes[j] = bytecon2[j];
+          Serial.readBytes((char*)&txData.bytes[0], txData.size);
           
+          
+          while(Serial.available() < 1);
           txData.checksum = Serial.read();
+          
           if(txData.checksum != 42) break;
           
           if(txData.periodMs == 0) 
@@ -171,7 +173,7 @@ void loop()
           #ifdef DEBUG
             Serial.println();
             Serial.print("size:\t");
-            Serial.println(txarr[txData.index].data.size);
+            Serial.println(txarr[txData.index].size);
             Serial.print("index:\t");
             Serial.println(txData.index);
             Serial.print("chksum:\t");
@@ -179,12 +181,12 @@ void loop()
             Serial.print("period:\t");
             Serial.println(txarr[txData.index].periodMs);
             Serial.print("arbID:\t");
-            Serial.println(txarr[txData.index].data.canId);
+            Serial.println(txarr[txData.index].canId);
             
             Serial.print("bytes:\t");
-            for(j= 0 ; j< txarr[txData.index].data.size; j++)
+            for(j= 0 ; j< txarr[txData.index].size; j++)
             {
-              Serial.print(txData.data.bytes[j]);
+              Serial.print(txData.bytes[j]);
               Serial.print("\t");
             }
             Serial.println();
