@@ -94,11 +94,10 @@ void loop()
         rxData.canId = CAN.getCanId();
         rxData.packetcount++;
 
-          
         if(sendmessages)
         { 
           sendmessages--;
-          Serial.write((unsigned char*)rxData, 15);
+          Serial.write((unsigned char*)&rxData, 15);
         }
     }
     
