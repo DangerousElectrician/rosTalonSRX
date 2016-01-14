@@ -46,9 +46,6 @@ struct RXData {
   INT32U canId;
   unsigned char bytes[8];
   unsigned char checksum = 42;
-  
-  
-  CANData data;
 };
 
 struct TXData {
@@ -92,24 +89,16 @@ void loop()
 
     if(CAN_MSGAVAIL == CAN.checkReceive())            // check if data coming
     {
-        CAN.readMsgBuf(&rxData.data.size, rxData.data.bytes);  
+        CAN.readMsgBuf(&rxData.size, rxData.bytes);  
 
-        rxData.data.canId = CAN.getCanId();
+        rxData.canId = CAN.getCanId();
         rxData.packetcount++;
 
-        bytecon[0] = rxData.data.canId & BYTEMASK;
-        bytecon[1] = (rxData.data.canId >> 8) & BYTEMASK;
-        bytecon[2] = (rxData.data.canId >> 16) & BYTEMASK;
-        bytecon[3] = (rxData.data.canId >> 24) & BYTEMASK;
           
         if(sendmessages)
         { 
           sendmessages--;
-          Serial.write(rxData.data.size);
-          Serial.write(rxData.packetcount);
-          Serial.write((unsigned char*)&rxData.data.canId, 4); //canID after shuffled into an array
-          Serial.write(rxData.data.bytes, rxData.data.size);
-          Serial.write(rxData.checksum);
+          Serial.write((unsigned char*)rxData, 15);
         }
     }
     
