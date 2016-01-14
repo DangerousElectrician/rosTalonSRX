@@ -41,22 +41,35 @@ struct CANData {
 };
 
 struct RXData {
-  CANData data;
-  unsigned char checksum = 42;
+  unsigned char size = 0;
   unsigned char packetcount = 0;
+  INT32U canId;
+  unsigned char bytes[8];
+  unsigned char checksum = 42;
+  
+  
+  CANData data;
 };
 
 struct TXData {
-  CANData data;
-  unsigned char checksum = 42;
-  unsigned char packetcount = 0;
-  long periodMs = -1;
+  unsigned char size = 0;
   unsigned char index = 0;
+  long periodMs = -1;
+  INT32U canId;
+  unsigned char bytes[8];
+  unsigned char checksum = 42;
+  
+  CANData data;
 };
   
 struct TXCANData {
-  CANData data;
+  unsigned char size = 0;
+  unsigned char bytes[8];
+  INT32U canId;
   long periodMs = -1;
+  
+  
+  CANData data;
 };
 TXCANData txarr[50];
 
@@ -91,7 +104,7 @@ void loop()
           
         if(sendmessages)
         { 
-          sendmessages--;  
+          sendmessages--;
           Serial.write(rxData.data.size);
           Serial.write(rxData.packetcount);
           Serial.write((unsigned char*)&rxData.data.canId, 4); //canID after shuffled into an array
