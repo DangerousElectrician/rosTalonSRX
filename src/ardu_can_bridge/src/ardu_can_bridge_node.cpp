@@ -179,11 +179,11 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	}
 
 	write(fd, &txdata.data.size, 1);
-	write(fd, &txdata.checksum, 1);	//checksum placeholder
 	write(fd, &txdata.index, 1);
 	write(fd, &txdata.periodMs, 4);
 	write(fd, &txdata.data.arbID, 4); 
 	write(fd, &txdata.data.bytes[0], msg->data.size);
+	write(fd, &txdata.checksum, 1);	
 }
 
 #define DATTIME 0
@@ -219,15 +219,15 @@ int main(int argc, char **argv) {
 		write(fd, "d", 1);
                 if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
-                                if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
-                                        if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
-                                                if(serialread(fd, &bytes, size, DATTIME) != -1 ) {
+				if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
+					if(serialread(fd, &bytes, size, DATTIME) != -1 ) {
+						if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
 
-                                                        std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
-                                                        for(int j = 0; j < size; j++) {
-                                                                std::cout << unsigned(bytes[j]) << " ";
-                                                        }
-                                                        std::cout << std::endl;
+							std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
+							for(int j = 0; j < size; j++) {
+								std::cout << unsigned(bytes[j]) << " ";
+							}
+							std::cout << std::endl;
 
 
 							can_talon_srx::CANData data;
@@ -237,9 +237,9 @@ int main(int argc, char **argv) {
 
 							receivedCAN[arbID] = data;
 
-                                                } else {std::cout << "byte err " << std::endl;}
-                                        } else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
-                                } else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}
+						} else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}
+					} else {std::cout << "byte err " << std::endl;}
+				} else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
                         } else {std::cout << "pcnt err " << std::endl;}
                 } else {std::cout << "size err " << unsigned(size) << std::endl;}
 

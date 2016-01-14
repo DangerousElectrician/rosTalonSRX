@@ -92,9 +92,9 @@ void loop()
           sendmessages--;  
           Serial.write(rxData.data.size);
           Serial.write(rxData.packetcount);
-          Serial.write(rxData.checksum);
           Serial.write(bytecon, 4); //canID after shuffled into an array
           Serial.write(rxData.data.bytes, rxData.data.size);
+          Serial.write(rxData.checksum);
         }
     }
     
@@ -140,9 +140,6 @@ void loop()
           txData.data.size = command;
           if(txData.data.size > 8) break;
           
-          while(Serial.available() < 2);
-          txData.checksum = Serial.read();
-          if(txData.checksum != 42) break;
           
           txData.index = Serial.read();
           
@@ -158,6 +155,9 @@ void loop()
           while(Serial.available() < txData.data.size);
           Serial.readBytes(bytecon2, txData.data.size);
           for(j = 0; j< txData.data.size; j++)  txData.data.bytes[j] = bytecon2[j];
+          
+          txData.checksum = Serial.read();
+          if(txData.checksum != 42) break;
           
           if(txData.periodMs == 0) 
           {
