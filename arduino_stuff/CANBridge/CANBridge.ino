@@ -151,7 +151,7 @@ void loop()
           txData.index = Serial.read();
           
           while(Serial.available() < 4);
-          Serial.readBytes((char*)&bytecon2[0], 4);
+          Serial.readBytes((char*)bytecon2, 4);
           txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
 
           while(Serial.available() < 4);
@@ -170,11 +170,13 @@ void loop()
           {
             CAN.sendMsgBuf(txData.data.canId, 1, txData.data.size, txData.data.bytes);
           }
-          
-          txarr[txData.index].data.size = txData.data.size;
-          txarr[txData.index].periodMs = txData.periodMs;
-          txarr[txData.index].data.canId = txData.data.canId;
-          for(j = 0; j< txData.data.size; j++) txarr[txData.index].data.bytes[j] = txData.data.bytes[j];
+          else 
+          {
+            txarr[txData.index].data.size = txData.data.size;
+            txarr[txData.index].periodMs = txData.periodMs;
+            txarr[txData.index].data.canId = txData.data.canId;
+            for(j = 0; j< txData.data.size; j++) txarr[txData.index].data.bytes[j] = txData.data.bytes[j];
+          }
           
           keepalive = 255;
           

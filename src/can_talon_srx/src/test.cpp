@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 		motor2.Set(.3);
 		motor.GetBatteryV(batteryV);
 		motor.GetLimitSwitchClosedFor(limitswitchfor);
-		motor2.GetAnalogInWithOv(sensorpos);
+		motor.GetAnalogInWithOv(sensorpos);
 		//motor.SetForwardSoftEnable(1);
 		//motor.GetForwardSoftEnable(fsoftenable);
 
