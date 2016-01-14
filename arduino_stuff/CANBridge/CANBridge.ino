@@ -140,13 +140,12 @@ void loop()
           txData.index = Serial.read();
           
           while(Serial.available() < 4);
-          Serial.readBytes((char*)bytecon2, 4);
-          txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
+          Serial.readBytes((char*)&txData.periodMs, 4);
+          //txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
 
           while(Serial.available() < 4);
-          Serial.readBytes((char*)bytecon2, 4);
-          txData.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
-
+          Serial.readBytes((char*)&txData.canId, 4);
+          //txData.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
           
           while(Serial.available() < txData.size);
           Serial.readBytes((char*)bytecon2, txData.size);
