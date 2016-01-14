@@ -129,31 +129,11 @@ void loop()
         case 6:
         case 7:
         case 8: // 1:size 1:index 4:period 4:arbID 8:data 1:checksum  19 total
-//          serInBuf[0] = command;
-//          while(Serial.available() < 18);
-//          Serial.readBytes((char*)&rxData, 18);
-          
           txData.size = command;
+          while(Serial.available() < 18);
+          Serial.readBytes((char*)&txData.index, 18);
           
           if(txData.size > 8) break;
-          
-          txData.index = Serial.read();
-          
-          while(Serial.available() < 4);
-          Serial.readBytes((char*)&txData.periodMs, 4);
-          //txData.periodMs = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
-
-          while(Serial.available() < 4);
-          Serial.readBytes((char*)&txData.canId, 4);
-          //txData.canId = (unsigned long)bytecon2[0] | ((unsigned long)bytecon2[1] << 8) | ((unsigned long)bytecon2[2] << 16) | ((unsigned long)bytecon2[3] << 24);
-          
-          while(Serial.available() < txData.size);
-          Serial.readBytes((char*)&txData.bytes[0], txData.size);
-          
-          
-          while(Serial.available() < 1);
-          txData.checksum = Serial.read();
-          
           if(txData.checksum != 42) break;
           
           if(txData.periodMs == 0) 
