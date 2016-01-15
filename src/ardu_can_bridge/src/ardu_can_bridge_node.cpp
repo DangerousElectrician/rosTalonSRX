@@ -196,11 +196,11 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 }
 
 struct RXData {
-	unsigned char size = 0;
-	unsigned char packetcount = 0;
-	unsigned long canId;
+	unsigned char size;
+	unsigned char packetcount;
+	unsigned long arbID:32; //needs to be 32 bits
 	unsigned char bytes[8];
-	unsigned char checksum = 42;
+	unsigned char checksum;
 };
 
 #define DATTIME 0
@@ -221,12 +221,12 @@ int main(int argc, char **argv) {
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 
-	unsigned int buf;
-        unsigned char size;
-        unsigned char packetcount;
-        unsigned char checksum;
-        unsigned int arbID;
-        unsigned char bytes[8];
+//	unsigned int buf;
+//        unsigned char size;
+//        unsigned char packetcount;
+//        unsigned char checksum;
+//        unsigned int arbID;
+//        unsigned char bytes[8];
 
 	ros::Rate r(100);
 
@@ -235,33 +235,39 @@ int main(int argc, char **argv) {
 	while(ros::ok()) {
 		RXData rxData;
 		write(fd, "d", 1);
-		//if(serialread(fd, rxData, 15));
-                if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
-                        if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
-				if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
-					if(serialread(fd, &bytes, 8, DATTIME) != -1 ) {
-						if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
+		if(serialread(fd, &rxData, 15, 100) != -1) {
+			if(rxData.size <= 8) {
+				if(rxData.arbID < 536870912) {
+					if(rxData.checksum == 42) {
+                //if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
+                //        if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
+		//		if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
+		//			if(serialread(fd, &bytes, 8, DATTIME) != -1 ) {
+		//				if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
 
-							std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
-							for(int j = 0; j < size; j++) {
-								std::cout << unsigned(bytes[j]) << " ";
+							std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+							for(int j = 0; j < rxData.size; j++) {
+								std::cout << unsigned(rxData.bytes[j]) << " ";
 							}
 							std::cout << std::endl;
 
 
 							can_talon_srx::CANData data;
-							data.arbID = arbID;
-							data.size = size;
-							data.bytes = std::vector<uint8_t> (bytes, bytes + size);
+							data.arbID = rxData.arbID;
+							data.size = rxData.size;
+							data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
 
-							receivedCAN[arbID] = data;
+							receivedCAN[data.arbID] = data;
 
-						} else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}
-					} else {std::cout << "byte err " << std::endl;}
-				} else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
-                        } else {std::cout << "pcnt err " << std::endl;}
-                }// else {std::cout << "size err " << unsigned(size) << std::endl;}
-
+		//				} else {std::cout << "cksm err " << unsigned(checksum) << std::endl;}
+		//			} else {std::cout << "byte err " << std::endl;}
+		//		} else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
+                //        } else {std::cout << "pcnt err " << std::endl;}
+                //} else {std::cout << "size err " << unsigned(size) << std::endl;}
+					}
+				}
+			}
+		}
 		//r.sleep();
 		ros::spinOnce();
 	}
