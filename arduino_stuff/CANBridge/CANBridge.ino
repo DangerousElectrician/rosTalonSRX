@@ -128,7 +128,7 @@ void loop()
         case 8: // 1:size 1:index 4:period 4:arbID 8:data 1:checksum  19 total
           txData.size = command;
           while(Serial.available() < 18);
-          Serial.readBytes((char*)&txData.index, 10+txData.size);
+          Serial.readBytes((char*)&txData.index, 18);
           
           if(txData.size > 8) break;
           if(txData.checksum != 42) break;

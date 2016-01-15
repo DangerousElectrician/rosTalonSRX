@@ -191,7 +191,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	write(fd, &txdata.index, 1);
 	write(fd, &txdata.periodMs, 4);
 	write(fd, &txdata.data.arbID, 4); 
-	write(fd, &txdata.data.bytes[0], msg->data.size);
+	write(fd, &txdata.data.bytes[0], 8);
 	write(fd, &txdata.checksum, 1);	
 }
 
