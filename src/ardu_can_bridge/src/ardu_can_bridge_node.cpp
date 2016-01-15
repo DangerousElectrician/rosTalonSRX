@@ -235,10 +235,11 @@ int main(int argc, char **argv) {
 	while(ros::ok()) {
 		RXData rxData;
 		write(fd, "d", 1);
+		//if(serialread(fd, rxData, 15));
                 if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
 				if(serialread(fd, &arbID, 4, DATTIME) != -1 && arbID < 536870912) {
-					if(serialread(fd, &bytes, size, DATTIME) != -1 ) {
+					if(serialread(fd, &bytes, 8, DATTIME) != -1 ) {
 						if(serialread(fd, &checksum, 1, DATTIME) != -1 && checksum == 42) {
 
 							std::cout << "size:" << unsigned(size) << " pcktcnt:" << unsigned(packetcount) << "\tchksum:" << unsigned(checksum) << "\tarbID:"<< unsigned(arbID) << "\tbytes:";
