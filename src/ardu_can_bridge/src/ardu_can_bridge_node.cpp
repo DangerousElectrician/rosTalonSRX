@@ -108,7 +108,7 @@ ssize_t serialread(int fd, void *buf, size_t count, long int timeoutus) {
         }
         else {
                 // timeout or error
-                std::cout << "timeout " << std::flush;
+                //std::cout << "timeout " << std::flush;
                 return -1;
         }
 }
@@ -151,6 +151,15 @@ void releaseIndex(int index) {
 	usedIndex[index] = 0;
 }
 
+struct TXData {
+	unsigned char size = 0;
+	unsigned char index = 0;
+	long periodMs = -1;
+	unsigned long arbID;
+	unsigned char bytes[8];
+	unsigned char checksum = 42;
+};
+
 void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	txCANData txdata;
 	txdata.data = msg->data;
@@ -186,6 +195,14 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	write(fd, &txdata.checksum, 1);	
 }
 
+struct RXData {
+	unsigned char size = 0;
+	unsigned char packetcount = 0;
+	unsigned long canId;
+	unsigned char bytes[8];
+	unsigned char checksum = 42;
+};
+
 #define DATTIME 0
 
 int main(int argc, char **argv) {
@@ -216,6 +233,7 @@ int main(int argc, char **argv) {
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
 	while(ros::ok()) {
+		RXData rxData;
 		write(fd, "d", 1);
                 if(serialread(fd, &size, 1, 1000) != -1 && size <= 8) {
                         if(serialread(fd, &packetcount, 1, DATTIME) != -1) {
@@ -241,7 +259,7 @@ int main(int argc, char **argv) {
 					} else {std::cout << "byte err " << std::endl;}
 				} else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
                         } else {std::cout << "pcnt err " << std::endl;}
-                } else {std::cout << "size err " << unsigned(size) << std::endl;}
+                }// else {std::cout << "size err " << unsigned(size) << std::endl;}
 
 		//r.sleep();
 		ros::spinOnce();
