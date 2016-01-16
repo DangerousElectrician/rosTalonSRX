@@ -136,7 +136,7 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 }
 
 int lockIndex() {
-	for(int i = 0; i < sizeof(usedIndex); i++) {
+	for(int i = 0; i < (int) sizeof(usedIndex); i++) { //ycm says that comparing an int and an unsigned long is bad
 		if(usedIndex[i]) {
 			
 		} else {
@@ -170,11 +170,12 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 
 	std::map<uint32_t, txCANData>::iterator i = transmittingCAN.find(txdata.data.arbID);
 	if( i == transmittingCAN.end() ) {
-		txdata.index = lockIndex();
-		if(txdata.index == -1) {
+		int tmpindex = lockIndex();
+		if(tmpindex == -1) {
 			ROS_ERROR("Cannot transmit periodic CAN message");
 			return ;
 		}
+		txdata.index  = tmpindex;
 		transmittingCAN[txdata.data.arbID] = txdata;
 	} else {
 		txCANData oldData = transmittingCAN[txdata.data.arbID];
@@ -218,7 +219,6 @@ int main(int argc, char **argv) {
 	std::string device = "/dev/ttyACM0";
 	nh.getParam("port", device);
 	fd = open_port(device);
-	uint8_t serbuf[14];
 
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
