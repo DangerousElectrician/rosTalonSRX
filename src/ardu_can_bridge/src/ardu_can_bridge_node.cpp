@@ -196,9 +196,12 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 }
 
 struct RXData {
-	unsigned char size;
-	unsigned char packetcount;
+	//unsigned char size;
+	uint8_t size;
+	//unsigned char packetcount;
+	uint8_t packetcount;
 	unsigned long arbID:32; //needs to be 32 bits
+	//uint32_t arbID:32; //this doesn't work
 	unsigned char bytes[8];
 	unsigned char checksum;
 };
@@ -264,10 +267,10 @@ int main(int argc, char **argv) {
 		//		} else {std::cout << "arID err " << unsigned(arbID) << std::endl;}
                 //        } else {std::cout << "pcnt err " << std::endl;}
                 //} else {std::cout << "size err " << unsigned(size) << std::endl;}
-					}
-				}
-			}
-		}
+					} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl;}
+				} else {std::cout << "arID err " << std::endl;}
+			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl;}
+		} //else {std::cout << "timeout " << std::flush;}
 		//r.sleep();
 		ros::spinOnce();
 	}
