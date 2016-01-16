@@ -81,7 +81,7 @@ flags = [
 './tests/gmock',
 '-isystem',
 './tests/gmock/include',
-
+# Path for ROS message header files
 '-I',
 './devel/include',
 ]
