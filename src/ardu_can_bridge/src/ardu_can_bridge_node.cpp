@@ -123,12 +123,6 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 		can_talon_srx::CANData data;
 		res.status = 1; //status is 1 if there is no CAN frame with requested arbID
 
-		//below is testing data
-		//data.arbID = req.arbID;
-		//data.size = 8;
-		//std::vector<uint8_t> candata{0,0,91,0,0,105,162,0};
-		//data.bytes = candata;
-		//receivedCAN[req.arbID] = data;
 	} else {
 		res.data = receivedCAN[req.arbID];
 	}
