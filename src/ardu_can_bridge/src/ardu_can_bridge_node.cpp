@@ -224,8 +224,10 @@ int main(int argc, char **argv) {
 
 	ros::Rate r(100);
 
+	ROS_INFO("Waiting for arduino bootloader to finish");
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
+	ROS_INFO("Starting communications");
 	while(ros::ok()) {
 		RXData rxData;
 		write(fd, "d", 1);
@@ -234,11 +236,11 @@ int main(int argc, char **argv) {
 				if(rxData.arbID < 536870912) {
 					if(rxData.checksum == 42) {
 
-						std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-						for(int j = 0; j < rxData.size; j++) {
-							std::cout << unsigned(rxData.bytes[j]) << " ";
-						}
-						std::cout << std::endl;
+						//std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+						//for(int j = 0; j < rxData.size; j++) {
+						//	std::cout << unsigned(rxData.bytes[j]) << " ";
+						//}
+						//std::cout << std::endl;
 
 						can_talon_srx::CANData data;
 						data.arbID = rxData.arbID;
