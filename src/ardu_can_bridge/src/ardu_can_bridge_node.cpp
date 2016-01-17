@@ -160,7 +160,6 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	txdata.periodMs = msg->periodMs;
 	
 	//ROS_INFO("send arbID: %ld", (long int) txdata.data.arbID);
-	ROS_INFO("send size: %ld", (long int) txdata.data.size);
 
 	std::map<uint32_t, txCANData>::iterator i = transmittingCAN.find(txdata.data.arbID);
 	if( i == transmittingCAN.end() ) {
@@ -182,6 +181,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 		}
 	}
 
+	ROS_INFO("send size: %ld index: %ld", (long int) txdata.data.size, (long int)txdata.index);
 	write(fd, &txdata.data.size, 1);
 	write(fd, &txdata.index, 1);
 	write(fd, &txdata.periodMs, 4);
