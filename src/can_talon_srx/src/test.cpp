@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
 	int fsoftenable;
 	while(ros::ok()) {
 		
-		motor.Set(.3);
-		motor2.Set(.3);
+		//motor.Set(.3);
+		//motor2.Set(.3);
 		motor.GetBatteryV(batteryV);
 		motor.GetAppliedThrottle(throttle);
 		motor.GetLimitSwitchClosedFor(limitswitchfor);
@@ -46,10 +46,10 @@ int main(int argc, char **argv) {
 		std::cout << "limitswitchfor\t" << limitswitchfor << std::endl;
 		std::cout << "sensorpos\t" << sensorpos << std::endl;
 		std::cout << "fsoftenable\t" << fsoftenable << std::endl;
-		//motor.Set(.1);
-		//ros::Duration(1).sleep();
-		//motor.Set(.3);
-		//ros::Duration(1).sleep();
+		motor.Set(.1);
+		ros::Duration(1).sleep();
+		motor.Set(.3);
+		ros::Duration(1).sleep();
 		ros::spinOnce();
 		//loop_rate.sleep();
 	}
