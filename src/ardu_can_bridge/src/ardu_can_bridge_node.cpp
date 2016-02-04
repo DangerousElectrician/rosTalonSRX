@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
 	while(ros::ok()) {
 		RXData rxData;
 		write(fd, "d", 1);
-		if(serialread(fd, &rxData, 15, 10) != -1) {
+		if(serialread(fd, &rxData, 15, 100) != -1) {
 			if(rxData.size <= 8) {
 				if(rxData.arbID < 536870912) {
 					if(rxData.checksum == 42) {
@@ -243,9 +243,9 @@ int main(int argc, char **argv) {
 
 						receivedCAN[data.arbID] = data;
 
-					} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl; ros::Duration(0.1).sleep();}
-				} else {std::cout << "arID err " << std::endl; ros::Duration(0.1).sleep();}
-			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl; ros::Duration(0.1).sleep();}
+					} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl;}
+				} else {std::cout << "arID err " << std::endl;}
+			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl;}
 		} //else {std::cout << "timeout " << std::flush;}
 		//r.sleep();
 		ros::spinOnce();

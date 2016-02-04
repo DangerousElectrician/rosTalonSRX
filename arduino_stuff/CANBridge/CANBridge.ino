@@ -116,13 +116,6 @@ void loop()
           sendmessages = 1;
           keepalive = 255;
           break;
-          
-        case 's':
-          CAN.begin(CAN_1000KBPS);
-          CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
-          Serial.println("hello");
-         break;
-
 
         case 0:
         case 1:
