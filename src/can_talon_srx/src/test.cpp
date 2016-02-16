@@ -11,13 +11,15 @@
 #include "can_talon_srx_msgs/control.h"
 //#include "std_msgs/String.h"
 
-//#include "std_msgs/String.h"
-
 CanTalonSRX* motor;
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 	//std::cout << "joy: " << joy->axes[1] << std::endl;
 	motor->Set(joy->axes[1]);
+}
+
+void controlCallback(const can_talon_srx_msgs::control::ConstPtr& control) {
+	motor->Set(control->set);
 }
 
 int main(int argc, char **argv) {
@@ -27,7 +29,8 @@ int main(int argc, char **argv) {
 	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 
-	ros::Subscriber joy_sub = n.subscribe("joy", 10, joyCallback);
+	//ros::Subscriber joy_sub = n.subscribe("joy", 10, joyCallback);
+	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
 	ros::Rate loop_rate(2); //in hertz
 
@@ -57,7 +60,7 @@ int main(int argc, char **argv) {
 		std::cout << "throttle\t" << throttle << std::endl;
 		std::cout << "limitswitchfor\t" << limitswitchfor << std::endl;
 		std::cout << "sensorpos\t" << sensorpos << std::endl;
-		std::cout << "fsoftenable\t" << fsoftenable << std::endl;
+		//std::cout << "fsoftenable\t" << fsoftenable << std::endl;
 		//motor.Set(.1);
 		//ros::Duration(1).sleep();
 		//motor.Set(.3);
