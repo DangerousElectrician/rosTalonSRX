@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 
-	ros::Rate r(100);
+	ros::Rate r(1000);
 
 	ROS_INFO("Waiting for arduino bootloader to finish");
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 				} else {std::cout << "arID err " << std::endl;}
 			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl;}
 		} //else {std::cout << "timeout " << std::flush;}
-		r.sleep();
+		r.sleep(); 
 		ros::spinOnce();
 	}
 
