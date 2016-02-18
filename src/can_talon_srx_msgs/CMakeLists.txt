@@ -48,6 +48,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
 	FILES
 	control.msg
+	status.msg
 #   Message1.msg
 #   Message2.msg
  )

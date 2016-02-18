@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 				} else {std::cout << "arID err " << std::endl;}
 			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl;}
 		} //else {std::cout << "timeout " << std::flush;}
-		r.sleep(); 
+		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
 		ros::spinOnce();
 	}
 
