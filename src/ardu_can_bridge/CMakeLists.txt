@@ -115,6 +115,7 @@ set( CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}" )
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -122,6 +123,7 @@ include_directories(
 # add_library(ardu_can_bridge
 #   src/${PROJECT_NAME}/ardu_can_bridge.cpp
 # )
+add_library(crc8_table src/crc8_table.c)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -131,6 +133,7 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
 add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
+target_link_libraries(ardu_can_bridge_node crc8_table)
 add_dependencies(ardu_can_bridge_node can_talon_srx_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable

@@ -2,6 +2,7 @@
 #include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANData.h"
+#include "crc8_table.h"
 #include <vector>
 #include <map>
 #include <iterator>
@@ -228,7 +229,7 @@ int main(int argc, char **argv) {
 		if(serialread(fd, &rxData, 15, 100) != -1) {
 			if(rxData.size <= 8) {
 				if(rxData.arbID < 536870912) {
-					if(rxData.checksum == 42) {
+					if(rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
 						std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
 						for(int j = 0; j < rxData.size; j++) {
