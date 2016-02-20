@@ -1,5 +1,5 @@
 /**
- * \file crc8-table.c
+ * \file crc8_table.c
  * Functions and types for CRC checks.
  *
  * Generated on Wed Jan 13 21:37:16 2016,
@@ -13,7 +13,7 @@
  *    ReflectOut    = False
  *    Algorithm     = table-driven
  *****************************************************************************/
-#include "crc8-table.h"     /* include the header file generated with pycrc */
+#include "crc8_table.h"     /* include the header file generated with pycrc */
 #include <stdlib.h>
 #include <stdint.h>
 

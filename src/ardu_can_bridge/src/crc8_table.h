@@ -1,5 +1,5 @@
 /**
- * \file crc8-table.h
+ * \file crc8_table.h
  * Functions and types for CRC checks.
  *
  * Generated on Wed Jan 13 21:37:11 2016,

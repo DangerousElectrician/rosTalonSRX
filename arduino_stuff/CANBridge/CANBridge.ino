@@ -79,6 +79,7 @@ void loop()
         CAN.readMsgBuf(&rxData.size, rxData.bytes);  
 
         rxData.canId = CAN.getCanId();
+        rxData.checksum = crc_update(0, &rxData.canId, 9);
         rxData.packetcount++;
 
         if(sendmessages)
