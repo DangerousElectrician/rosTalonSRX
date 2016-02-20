@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::status>("status", 10);
 
-	//ros::Subscriber joy_sub = n.subscribe("joy", 10, joyCallback);
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
 	ros::Rate loop_rate(2); //in hertz
