@@ -1,7 +1,7 @@
 
 #include <SPI.h>
 #include "mcp_can.h"
-#include "crc8-table.h"
+#include "crc8_table.h"
 
 #define BYTEMASK B11111111
 
