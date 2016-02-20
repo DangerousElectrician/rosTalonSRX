@@ -12,11 +12,6 @@
 
 CanTalonSRX* motor;
 
-void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
-	//std::cout << "joy: " << joy->axes[1] << std::endl;
-	motor->Set(joy->axes[1]);
-}
-
 void controlCallback(const can_talon_srx_msgs::control::ConstPtr& control) {
 	motor->Set(control->set);
 }
