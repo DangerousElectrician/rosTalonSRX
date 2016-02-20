@@ -40,8 +40,8 @@ extern "C"
 		can_talon_srx::CANRecv srv;
 		srv.request.arbID = *messageID;
 		if(CANRecv_cli->call(srv)) {
-			ROS_INFO("sent CANRecv");
-			ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
+			//ROS_INFO("sent CANRecv");
+			//ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
 			*dataSize = srv.response.data.size;
 			*status = srv.response.status;
 			std::copy(srv.response.data.bytes.begin(), srv.response.data.bytes.begin()+*dataSize, data);
@@ -53,26 +53,18 @@ extern "C"
 			std::cout << unsigned(data[i]) << "\t";
 		}
 		std::cout << "status " << *status << std::endl;
-		//data[0] = 0;
-		//data[1] = 0;
-		//data[2] = 91;
-		//data[3] = 0;
-		//data[4] = 0;
-		//data[5] = 105;
-		//data[6] = 162;
-		//data[7] = 0;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_openStreamSession(uint32_t *sessionHandle, uint32_t messageID, uint32_t messageIDMask, uint32_t maxMessages, int32_t *status) {
-		std::cout << "openStreamCAN" << std::endl;
+		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_openStreamSession not implemented");
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_closeStreamSession(uint32_t sessionHandle) {
-		std::cout << "closeStreamCAN" << std::endl;
+		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_closeStreamSession not implemented");
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_readStreamSession(uint32_t sessionHandle, struct tCANStreamMessage *messages, uint32_t messagesToRead, uint32_t *messagesRead, int32_t *status) {
-		std::cout << "readStreamCAN" << std::endl;
+		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_readStreamSession not implemented");
 	}
 
 	//void FRC_NetworkCommunication_CANSessionMux_getCANStatus(float *percentBusUtilization, uint32_t *busOffCount, uint32_t *txFullCount, uint32_t *receiveErrorCount, uint32_t *transmitErrorCount, int32_t *status);

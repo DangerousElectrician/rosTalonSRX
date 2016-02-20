@@ -115,7 +115,7 @@ ssize_t serialread(int fd, void *buf, size_t count, long int timeoutus) {
 }
 
 bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
-	ROS_INFO("request arbID: %ld", (long int)req.arbID);
+	//ROS_INFO("request arbID: %ld", (long int)req.arbID);
 
 	std::map<uint32_t, can_talon_srx::CANData>::iterator i = receivedCAN.find(req.arbID);
 	if(i == receivedCAN.end()) {
@@ -182,7 +182,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 		}
 	}
 
-	ROS_INFO("send size: %ld index: %ld", (long int) txdata.data.size, (long int)txdata.index);
+	//ROS_INFO("send size: %ld index: %ld", (long int) txdata.data.size, (long int)txdata.index);
 	write(fd, &txdata.data.size, 1);
 	write(fd, &txdata.index, 1);
 	write(fd, &txdata.periodMs, 4);
