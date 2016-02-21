@@ -76,6 +76,7 @@ Talon SRX needs to receive a token to enable output
 
 Create a motor control node?
 	CanTalonSRX has many functions, reimplementing would be time consuming
+		actually not so time consuming with the magic of vim
 Run in an existing node?
 	No need to reimplement functions to work with ROS messages.
 
@@ -86,11 +87,18 @@ Layout
 		pass ROS node as parameter
 		CANTalonSRX saves node in pointer
 	Use normal CANTalonSRX api
-	Send ROS messages to a CAN bridge
+	Send ROS messages to a CAN bridge node
 
 
-Benchmark
+catkin_make benchmark
 	4 vbox cores: 0m26.699s
 	2 vbox cores: 0m40.103s
 
 ros::spin() blocks
+
+FRC_NetworkCommunication_CANSessionMux_openStreamSession and the rest of the stream functions are required for solicited parameters.
+FRC_NetworkCommunication_CANSessionMux_closeStreamSession is used once in the destructor
+Stream session caches received messages for a particular arbID for later
+_can_h is the handle for the stream session
+	there is only one stream open at a time
+Data from a stream session are kept in _sigs and are accessed by enum. _sigs is a map
