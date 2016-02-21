@@ -32,7 +32,7 @@ START_INIT:
         goto START_INIT;
     }
     
-    CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
+    //CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
 }
 
 struct RXData {
@@ -63,7 +63,9 @@ TXCANData txarr[50];
 RXData rxData;
 TXData txData;
 
-char serInBuf[19];
+RXData RXDataBuffer[10];
+unsigned char RXDataBufferWriteIndex = 0;
+unsigned char RXDataBufferReadIndex = 0;
 
 unsigned char keepalive = 0;
 unsigned char sendmessages = 0;
@@ -73,7 +75,6 @@ int j = 0;
 
 void loop()
 {
-
     if(CAN_MSGAVAIL == CAN.checkReceive())            // check if data coming
     {
         CAN.readMsgBuf(&rxData.size, rxData.bytes);  
@@ -82,11 +83,16 @@ void loop()
         rxData.checksum = crc_update(0, &rxData.canId, 12);
         rxData.packetcount++;
 
-        if(sendmessages)
-        { 
-          sendmessages--;
-          Serial.write((unsigned char*)&rxData, 15);
-        }
+	RXDataBuffer[RXDataBufferWriteIndex].size = rxData.size;
+	RXDataBuffer[RXDataBufferWriteIndex].packetcount = rxData.packetcount;
+	RXDataBuffer[RXDataBufferWriteIndex].canId = rxData.canId;
+        for(j = 0; j< rxData.size; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
+	RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
+
+	if(RXDataBufferWriteIndex < 10) RXDataBufferWriteIndex++;
+	else RXDataBufferWriteIndex = 0;
+
+
     }
     
     if(keepalive)
@@ -115,9 +121,25 @@ void loop()
       switch(command)
       {
         case 'd':
-          sendmessages = 1;
+	  if(RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
+	  {
+	  	Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
+		if(RXDataBufferReadIndex < 10) RXDataBufferReadIndex++;
+		else RXDataBufferReadIndex = 0;
+	  }
           keepalive = 255;
           break;
+
+	case 'r': //resend message
+	  if(RXDataBufferReadIndex == 0)
+	  {
+	    Serial.write((unsigned char*) &RXDataBuffer[9], 15);
+	  }
+	  else
+	  {
+	    Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex-1], 15);
+	  }
+	  break;
 
         case 0:
         case 1:
