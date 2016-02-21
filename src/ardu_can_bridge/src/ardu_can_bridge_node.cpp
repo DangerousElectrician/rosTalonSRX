@@ -227,22 +227,26 @@ int main(int argc, char **argv) {
 		RXData rxData;
 		write(fd, "d", 1);
 		if(serialread(fd, &rxData, 15, 100) != -1) {
-			if(rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
+			if(rxData.size <= 8) {
+				if(rxData.arbID < 536870912) {
+					if(rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				for(int j = 0; j < rxData.size; j++) {
-					std::cout << unsigned(rxData.bytes[j]) << " ";
-				}
-				std::cout << std::endl;
+						std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+						for(int j = 0; j < rxData.size; j++) {
+							std::cout << unsigned(rxData.bytes[j]) << " ";
+						}
+						std::cout << std::endl;
 
-				can_talon_srx::CANData data;
-				data.arbID = rxData.arbID;
-				data.size = rxData.size;
-				data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
+						can_talon_srx::CANData data;
+						data.arbID = rxData.arbID;
+						data.size = rxData.size;
+						data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
 
-				receivedCAN[data.arbID] = data;
+						receivedCAN[data.arbID] = data;
 
-			} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl;}
+					} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl;}
+				} else {std::cout << "arID err " << std::endl;}
+			} else {std::cout << "size err " << unsigned(rxData.size) << std::endl;}
 		} //else {std::cout << "timeout " << std::flush;}
 		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
 		ros::spinOnce();
