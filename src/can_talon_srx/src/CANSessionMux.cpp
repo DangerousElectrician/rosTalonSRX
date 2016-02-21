@@ -55,6 +55,11 @@ extern "C"
 		std::cout << "status " << *status << std::endl;
 	}
 
+//sessionHandle: set this integer to identify a session
+//messageID: arbID of messages to cache
+//messageIDMask: CanTalonSRX sets this to 0xFFFFFFFF, probably can ignore
+//maxMessages: number of messages to cache
+//status: set to zero if everything worked
 	void FRC_NetworkCommunication_CANSessionMux_openStreamSession(uint32_t *sessionHandle, uint32_t messageID, uint32_t messageIDMask, uint32_t maxMessages, int32_t *status) {
 		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_openStreamSession not implemented");
 	}

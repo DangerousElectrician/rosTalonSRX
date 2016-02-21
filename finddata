@@ -99,6 +99,10 @@ ros::spin() blocks
 FRC_NetworkCommunication_CANSessionMux_openStreamSession and the rest of the stream functions are required for solicited parameters.
 FRC_NetworkCommunication_CANSessionMux_closeStreamSession is used once in the destructor
 Stream session caches received messages for a particular arbID for later
+There is a single arbID for all recieved parameters. Parameters are differentiated by a ParamEnum field in the received message
 _can_h is the handle for the stream session
 	there is only one stream open at a time
 Data from a stream session are kept in _sigs and are accessed by enum. _sigs is a map
+
+tell can device to remember this many messages from this arbID
+ask for cached messages
