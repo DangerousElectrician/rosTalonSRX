@@ -232,6 +232,11 @@ int main(int argc, char **argv) {
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
 	ROS_INFO("Starting communications");
+
+	int missedPackets = 0; //for gathering stats
+	int goodPackets = 0;
+	int prevPacketCount = 0;
+
 	char datagood = 1;
 	//write(fd, "q" ,1);
 	while(ros::ok()) {
@@ -276,6 +281,14 @@ int main(int argc, char **argv) {
 					//}
 					//std::cout << std::endl<< std::flush;
 
+					if(goodPackets != 0 && rxData.packetcount - 1 != prevPacketCount && rxData.packetcount != prevPacketCount) {
+						missedPackets += (unsigned char)(rxData.packetcount - prevPacketCount - 1);
+						//std::cout<< "prevPacketCount: " << unsigned(prevPacketCount) << std::endl;
+						//std::cout << "missed: " << unsigned((unsigned char)(rxData.packetcount - prevPacketCount -1 )) << std::endl;
+					}
+					prevPacketCount = rxData.packetcount;
+					goodPackets++;
+
 				} else {
 					for(int j = 0; j < 15; j++) {
 						std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
@@ -291,6 +304,11 @@ int main(int argc, char **argv) {
 		ros::spinOnce();
 	}
 	write(fd, "w", 1);
+
+	std::cout << std::endl << "goodPackets:\t" << goodPackets << std::endl;
+	std::cout << "missedPackets:\t" << missedPackets << std::endl << std::endl;
+	std::cout << "totalPackets:\t" << goodPackets+missedPackets << std::endl;
+	std::cout << "percentGood:\t" << float(goodPackets)/(goodPackets+missedPackets) << std::endl;
 
 	return 0;
 }
