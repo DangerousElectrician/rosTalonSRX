@@ -66,10 +66,13 @@ TXData txData;
 RXData RXDataBuffer[10];
 unsigned char RXDataBufferWriteIndex = 0;
 unsigned char RXDataBufferReadIndex = 0;
+unsigned char prevRXDataBufferReadIndex = 0;
 
 unsigned char keepalive = 0;
 unsigned char sendmessages = 0;
 unsigned char command = 0;
+
+unsigned char stream = 0;
 
 int j = 0;
 
@@ -89,7 +92,7 @@ void loop()
         for(j = 0; j< rxData.size; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
 	RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
 
-	if(RXDataBufferWriteIndex < 10) RXDataBufferWriteIndex++;
+	if(RXDataBufferWriteIndex < 9) RXDataBufferWriteIndex++;
 	else RXDataBufferWriteIndex = 0;
 
 
@@ -114,7 +117,15 @@ void loop()
         txarr[j].periodMs = -1;
       }
     }
-          
+
+    if(stream && RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
+    {
+    	Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
+        prevRXDataBufferReadIndex = RXDataBufferReadIndex;
+        if(RXDataBufferReadIndex < 9) RXDataBufferReadIndex++;
+        else RXDataBufferReadIndex = 0;
+    }
+
     if(Serial.available())
     {
       command = Serial.read();
@@ -123,22 +134,33 @@ void loop()
         case 'd':
 	  if(RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
 	  {
+		noInterrupts();
 	  	Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
-		if(RXDataBufferReadIndex < 10) RXDataBufferReadIndex++;
+		interrupts();
+		prevRXDataBufferReadIndex = RXDataBufferReadIndex;
+		if(RXDataBufferReadIndex < 9) RXDataBufferReadIndex++;
 		else RXDataBufferReadIndex = 0;
 	  }
           keepalive = 255;
           break;
 
 	case 'r': //resend message
-	  if(RXDataBufferReadIndex == 0)
+	  if(RXDataBufferReadIndex < 1)
 	  {
-	    Serial.write((unsigned char*) &RXDataBuffer[9], 15);
+	    Serial.write((unsigned char*) &RXDataBuffer[9+RXDataBufferReadIndex], 15);
 	  }
 	  else
 	  {
 	    Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex-1], 15);
 	  }
+	  break;
+
+	case 'q':
+	  stream = 1;
+	  break;
+
+	case 'w':
+	  stream = 0;
 	  break;
 
         case 0:
