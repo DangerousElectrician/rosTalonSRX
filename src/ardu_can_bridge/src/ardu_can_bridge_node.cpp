@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
 		unsigned char header=255;
 		if(serialread(fd, &header, 1, 100) != 0) {
 			if(!skip) {
-				if(header <= 8 && serialread(fd, &rxData.packetcount, 14, 100) != -1) {
+				if(header <= 8 && serialread(fd, &rxData.packetcount, 14, 0) != -1) {
 					rxData.size = header;
 					if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
@@ -302,7 +302,7 @@ int main(int argc, char **argv) {
 						std::cout << std::endl<< std::flush;
 						datagood = 0;
 						skip = 1;
-						//flushSerial(fd);
+						flushSerial(fd);
 					}
 				}
 			} else skip = 0;
