@@ -202,6 +202,15 @@ struct RXData {
 	unsigned char checksum;
 };
 
+void flushSerial(int fd) {
+	char buf [1000];
+	int n;
+	do { //flush input buffer
+		n = read (fd, buf, sizeof buf);
+	} while (n > 0);
+}
+
+
 int main(int argc, char **argv) {
 
 
@@ -217,36 +226,71 @@ int main(int argc, char **argv) {
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 
-	ros::Rate r(1000);
+	ros::Rate r(500);
 
 	ROS_INFO("Waiting for arduino bootloader to finish");
 	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
 
 	ROS_INFO("Starting communications");
+	char datagood = 1;
+	//write(fd, "q" ,1);
 	while(ros::ok()) {
 		RXData rxData;
-		write(fd, "d", 1);
-		if(serialread(fd, &rxData, 15, 100) != -1) {
-			if(rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				for(int j = 0; j < rxData.size; j++) {
-					std::cout << unsigned(rxData.bytes[j]) << " ";
+		//datagood = 1;
+		if(datagood) write(fd, "d", 1);
+		else { 
+			write(fd, "r", 1);
+		}
+
+		//if(!datagood) {
+		//	write(fd, "w", 1); //stop stream and ask for repeat
+		//	write(fd, "r", 1);
+		//}
+
+		unsigned char header=255;
+		if(serialread(fd, &header, 1, 100) != 0) {
+			rxData.size = header;
+			if(serialread(fd, &rxData.packetcount, 14, 100) != -1) {
+				if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
+
+					std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+					for(int j = 0; j < rxData.size; j++) {
+						std::cout << unsigned(rxData.bytes[j]) << " ";
+					}
+					std::cout << std::endl << std::flush;
+
+					can_talon_srx::CANData data;
+					data.arbID = rxData.arbID;
+					data.size = rxData.size;
+					data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
+
+					receivedCAN[data.arbID] = data;
+					if(!datagood) {
+						datagood = 1;
+						//write(fd, "q", 1); //restart stream
+					}
+
+					//for(int j = 0; j < 15; j++) {
+					//	std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
+					//}
+					//std::cout << std::endl<< std::flush;
+
+				} else {
+					for(int j = 0; j < 15; j++) {
+						std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
+					}
+					std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
+					std::cout << std::endl<< std::flush;
+					datagood = 0;
+					flushSerial(fd);
 				}
-				std::cout << std::endl;
-
-				can_talon_srx::CANData data;
-				data.arbID = rxData.arbID;
-				data.size = rxData.size;
-				data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
-
-				receivedCAN[data.arbID] = data;
-
-			} else {std::cout << "cksm err " << unsigned(rxData.checksum) << std::endl;}
-		} //else {std::cout << "timeout " << std::flush;}
+			}
+		}
 		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
 		ros::spinOnce();
 	}
+	write(fd, "w", 1);
 
 	return 0;
 }
