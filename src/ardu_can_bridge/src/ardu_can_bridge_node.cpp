@@ -84,6 +84,9 @@ int open_port(std::string dev) {
 	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make raw
 	options.c_oflag &= ~OPOST; // make raw
 
+	options.c_cc[VMIN] = 100;
+	options.c_cc[VTIME] = 2;
+
 	tcsetattr(fd, TCSANOW, &options); //Set the new options for the port...
 
 	return (fd);
@@ -204,13 +207,14 @@ struct RXData {
 };
 
 void flushSerial(int fd) {
-	unsigned char buf [10];
+	unsigned char buf [100];
 	int n;
 	int bytes_avail;
 	ioctl(fd, TIOCINQ, &bytes_avail);
 	//std::cout << "flushed "; 
 	while(bytes_avail > 0) {
-		n = serialread (fd, buf, 1, 0);
+		//std::cout << "flush" << std::endl;
+		n = serialread (fd, buf, bytes_avail, 0);
 		ioctl(fd, TIOCINQ, &bytes_avail);
 		//std::cout << unsigned(buf[0]) << "\t" << std::flush;
 	}
@@ -253,8 +257,6 @@ int main(int argc, char **argv) {
 		//datagood = 1;
 		if(datagood) write(fd, "d", 1);
 		else { 
-			flushSerial(fd);
-			write(fd, "r", 1);
 		}
 
 		//if(!datagood) {
@@ -311,8 +313,10 @@ int main(int argc, char **argv) {
 						datagood = 0;
 						//skip = 1;
 						//flushSerial(fd);
+			flushSerial(fd);
+			write(fd, "r", 1);
 					}
-				} else flushSerial(fd);
+				} //else flushSerial(fd);
 			} else skip = 0;
 		}
 		//int bytes_avail;
