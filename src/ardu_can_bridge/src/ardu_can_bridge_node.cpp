@@ -14,6 +14,7 @@
 #include <fcntl.h>   /* File control definitions */
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
+#include <sys/ioctl.h>
 
 #define BAUD B115200
 #define PORT "/dev/ttyACM0"
@@ -203,11 +204,14 @@ struct RXData {
 };
 
 void flushSerial(int fd) {
-	char buf [1000];
+	char buf [10];
 	int n;
-	do { //flush input buffer
-		n = read (fd, buf, sizeof buf);
-	} while (n > 0);
+	int bytes_avail;
+	ioctl(fd, TIOCINQ, &bytes_avail);
+	while(bytes_avail > 0) {
+		n = serialread (fd, buf, 1, 0);
+		ioctl(fd, TIOCINQ, &bytes_avail);
+	}
 }
 
 
@@ -255,9 +259,9 @@ int main(int argc, char **argv) {
 		//}
 
 		unsigned char header=255;
-		if(serialread(fd, &header, 1, 100) != 0) {
+		if(serialread(fd, &header, 1, 0) != 0) {
 			if(!skip) {
-				if(header <= 8 && serialread(fd, &rxData.packetcount, 14, 0) != -1) {
+				if(header <= 8 && serialread(fd, &rxData.packetcount, 14, 1000) != -1) {
 					rxData.size = header;
 					if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
@@ -301,12 +305,15 @@ int main(int argc, char **argv) {
 						std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
 						std::cout << std::endl<< std::flush;
 						datagood = 0;
-						skip = 1;
+						//skip = 1;
 						flushSerial(fd);
 					}
 				}
 			} else skip = 0;
 		}
+		int bytes_avail;
+		ioctl(fd, TIOCINQ, &bytes_avail);
+		std::cout << "bytes_avail " << bytes_avail << std::endl;
 		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
 		ros::spinOnce();
 	}
