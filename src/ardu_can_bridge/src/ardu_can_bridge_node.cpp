@@ -204,14 +204,17 @@ struct RXData {
 };
 
 void flushSerial(int fd) {
-	char buf [10];
+	unsigned char buf [10];
 	int n;
 	int bytes_avail;
 	ioctl(fd, TIOCINQ, &bytes_avail);
+	//std::cout << "flushed "; 
 	while(bytes_avail > 0) {
 		n = serialread (fd, buf, 1, 0);
 		ioctl(fd, TIOCINQ, &bytes_avail);
+		//std::cout << unsigned(buf[0]) << "\t" << std::flush;
 	}
+	//std::cout << std::endl;
 }
 
 
@@ -250,6 +253,7 @@ int main(int argc, char **argv) {
 		//datagood = 1;
 		if(datagood) write(fd, "d", 1);
 		else { 
+			flushSerial(fd);
 			write(fd, "r", 1);
 		}
 
@@ -258,11 +262,11 @@ int main(int argc, char **argv) {
 		//	write(fd, "r", 1);
 		//}
 
-		unsigned char header=255;
-		if(serialread(fd, &header, 1, 0) != 0) {
+		//unsigned char header=255;
+		if(true) { //serialread(fd, &header, 1, 100) != 0) {
 			if(!skip) {
-				if(header <= 8 && serialread(fd, &rxData.packetcount, 14, 1000) != -1) {
-					rxData.size = header;
+				if(serialread(fd, &rxData.size, 15, 10) != -1) {
+					//rxData.size = header;
 					if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
 						std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
@@ -306,14 +310,14 @@ int main(int argc, char **argv) {
 						std::cout << std::endl<< std::flush;
 						datagood = 0;
 						//skip = 1;
-						flushSerial(fd);
+						//flushSerial(fd);
 					}
-				}
+				} else flushSerial(fd);
 			} else skip = 0;
 		}
-		int bytes_avail;
-		ioctl(fd, TIOCINQ, &bytes_avail);
-		std::cout << "bytes_avail " << bytes_avail << std::endl;
+		//int bytes_avail;
+		//ioctl(fd, TIOCINQ, &bytes_avail);
+		//std::cout << "bytes_avail " << bytes_avail << std::endl;
 		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
 		ros::spinOnce();
 	}
