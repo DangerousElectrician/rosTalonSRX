@@ -34,7 +34,10 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
-	ros::Rate loop_rate(200); //in hertz
+	ros::Rate loop_rate(30); //in hertz
+
+	ros::AsyncSpinner spinner(1);
+	spinner.start();
 
 	init_CANSend(CANSend_pub, CANRecv_cli);
 	motor = new CanTalonSRX(1);
@@ -131,7 +134,8 @@ int main(int argc, char **argv) {
 		status_msg.IsPulseWidthSensorPresent = param;
 
 		status_pub.publish(status_msg);
-		ros::spinOnce();
+		//ros::spin();
+		//ros::spinOnce();
 		loop_rate.sleep();
 	}
 }
