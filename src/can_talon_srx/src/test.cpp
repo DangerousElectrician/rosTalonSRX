@@ -7,6 +7,7 @@
 
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANRecv.h"
+#include "can_talon_srx/Set.h"
 #include "can_talon_srx_msgs/control.h"
 #include "can_talon_srx_msgs/status.h"
 
@@ -16,6 +17,11 @@ void controlCallback(const can_talon_srx_msgs::control::ConstPtr& control) {
 	motor->Set(control->set);
 }
 
+bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
+	motor->Set(req.set);
+	return true;
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "talontest");
 	ros::NodeHandle n;
@@ -23,6 +29,8 @@ int main(int argc, char **argv) {
 	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::status>("status", 10);
+	
+	ros::ServiceServer set_srv = n.advertiseService("set", set);
 
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
