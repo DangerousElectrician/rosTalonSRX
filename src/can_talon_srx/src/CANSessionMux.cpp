@@ -28,15 +28,15 @@ extern "C"
 		msg.periodMs = periodMs;
 		CANSend_pub->publish(msg);
 
-		std::cout << "sendCAN " << messageID << "\t";
-		for(int i = 0; i < dataSize; i++) {
-			std::cout << unsigned(data[i]) << "\t";
-		}
-		std::cout << "datsize:" << unsigned(dataSize) << "\tper:" << periodMs << std::endl;
+		//std::cout << "sendCAN " << messageID << "\t";
+		//for(int i = 0; i < dataSize; i++) {
+		//	std::cout << unsigned(data[i]) << "\t";
+		//}
+		//std::cout << "datsize:" << unsigned(dataSize) << "\tper:" << periodMs << std::endl;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_receiveMessage(uint32_t *messageID, uint32_t messageIDMask, uint8_t *data, uint8_t *dataSize, uint32_t *timeStamp, int32_t *status) {
-		std::cout << "recvCAN " << *messageID << std::endl;
+		//std::cout << "recvCAN " << *messageID << std::endl;
 		can_talon_srx::CANRecv srv;
 		srv.request.arbID = *messageID;
 		if(CANRecv_cli->call(srv)) {
@@ -49,10 +49,10 @@ extern "C"
 			ROS_ERROR("no CANRecv service");
 			*status = 2;
 		}
-		for(int i = 0; i < *dataSize; i++) {
-			std::cout << unsigned(data[i]) << "\t";
-		}
-		std::cout << "status " << *status << std::endl;
+		//for(int i = 0; i < *dataSize; i++) {
+		//	std::cout << unsigned(data[i]) << "\t";
+		//}
+		//std::cout << "status " << *status << std::endl;
 	}
 
 //sessionHandle: set this integer to identify a session
