@@ -60,16 +60,27 @@ extern "C"
 //messageIDMask: CanTalonSRX sets this to 0xFFFFFFFF, probably can ignore
 //maxMessages: number of messages to cache
 //status: set to zero if everything worked
+	uint32_t _messageID = 0;
 	void FRC_NetworkCommunication_CANSessionMux_openStreamSession(uint32_t *sessionHandle, uint32_t messageID, uint32_t messageIDMask, uint32_t maxMessages, int32_t *status) {
-		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_openStreamSession not implemented");
+		ROS_WARN("FRC_NetworkCommunication_CANSessionMux_openStreamSession not fully implemented");
+		*sessionHandle = 1; //set the session handle to something or else CanTalonSRX won't continue
+		_messageID = messageID;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_closeStreamSession(uint32_t sessionHandle) {
-		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_closeStreamSession not implemented");
+		ROS_WARN("FRC_NetworkCommunication_CANSessionMux_closeStreamSession not implemented");
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_readStreamSession(uint32_t sessionHandle, struct tCANStreamMessage *messages, uint32_t messagesToRead, uint32_t *messagesRead, int32_t *status) {
-		ROS_ERROR("FRC_NetworkCommunication_CANSessionMux_readStreamSession not implemented");
+		ROS_WARN("FRC_NetworkCommunication_CANSessionMux_readStreamSession not implemented");
+		uint8_t data[8];
+		uint32_t *timeStamp = 0;
+		int32_t *mystatus = 0;
+		FRC_NetworkCommunication_CANSessionMux_receiveMessage(&_messageID, 0, messages->data, &messages->dataSize, timeStamp, mystatus);
+		messages->messageID = _messageID;
+		*messagesRead = 0;
+
+
 	}
 
 	//void FRC_NetworkCommunication_CANSessionMux_getCANStatus(float *percentBusUtilization, uint32_t *busOffCount, uint32_t *txFullCount, uint32_t *receiveErrorCount, uint32_t *transmitErrorCount, int32_t *status);
