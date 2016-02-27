@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
-	ros::Rate loop_rate(2); //in hertz
+	ros::Rate loop_rate(200); //in hertz
 
 	init_CANSend(CANSend_pub, CANRecv_cli);
 	motor = new CanTalonSRX(1);
@@ -124,5 +124,6 @@ int main(int argc, char **argv) {
 
 		status_pub.publish(status_msg);
 		ros::spinOnce();
+		loop_rate.sleep();
 	}
 }
