@@ -63,7 +63,7 @@ add_service_files(
 	FILES 
 	CANRecv.srv
 	Set.srv
-	GetParamResponse.srv
+	GetParameter.srv
 )
 
 ## Generate actions in the 'action' folder
