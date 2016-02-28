@@ -20,10 +20,10 @@ void controlCallback(const can_talon_srx_msgs::control::ConstPtr& control) {
 	motor->Set(control->set);
 }
 
-bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
-	motor->Set(req.set);
-	return true;
-}
+//bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
+//	motor->Set(req.set);
+//	return true;
+//}
 
 bool getParameter(can_talon_srx::GetParameter::Request &req, can_talon_srx::GetParameter::Response &res) {
 	motor->RequestParam((CanTalonSRX::param_t)req.param);
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::status>("status", 10);
 	
-	ros::ServiceServer set_srv = n.advertiseService("set", set);
+	//ros::ServiceServer set_srv = n.advertiseService("set", set);
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
 	ros::ServiceServer configSetParameter_srv = n.advertiseService("configSetParameter", configSetParameter);
 

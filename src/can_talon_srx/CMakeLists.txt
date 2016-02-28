@@ -62,7 +62,6 @@ add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 add_service_files(
 	FILES 
 	CANRecv.srv
-	Set.srv
 	GetParameter.srv
 	ConfigSetParameter.srv
 )
