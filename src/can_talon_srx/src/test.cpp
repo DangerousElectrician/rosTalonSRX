@@ -7,12 +7,11 @@
 
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANRecv.h"
-//#include "can_talon_srx/Set.h"
 #include "can_talon_srx/GetParameter.h"
-#include "can_talon_srx/ConfigSetParameter.h"
 
 #include "can_talon_srx_msgs/Set.h"
 #include "can_talon_srx_msgs/Status.h"
+#include "can_talon_srx_msgs/ConfigSetParameter.h"
 
 CanTalonSRX* motor;
 
@@ -20,20 +19,14 @@ void setCallback(const can_talon_srx_msgs::Set::ConstPtr& control) {
 	motor->Set(control->set);
 }
 
-//bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
-//	motor->Set(req.set);
-//	return true;
-//}
+void configSetParameterCallback(const can_talon_srx_msgs::ConfigSetParameter::ConstPtr& msg) {
+	motor->SetParam((CanTalonSRX::param_t) msg->param, msg->value);
+}
 
 bool getParameter(can_talon_srx::GetParameter::Request &req, can_talon_srx::GetParameter::Response &res) {
 	motor->RequestParam((CanTalonSRX::param_t)req.param);
 	ros::Duration(0.04).sleep();
 	motor->GetParamResponse((CanTalonSRX::param_t)req.param, res.value);
-	return true;
-}
-
-bool configSetParameter(can_talon_srx::ConfigSetParameter::Request &req, can_talon_srx::ConfigSetParameter::Response &res) {
-	motor->SetParam((CanTalonSRX::param_t) req.param, req.value);
 	return true;
 }
 
@@ -45,11 +38,10 @@ int main(int argc, char **argv) {
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::Status>("status", 10);
 	
-	//ros::ServiceServer set_srv = n.advertiseService("set", set);
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
-	ros::ServiceServer configSetParameter_srv = n.advertiseService("configSetParameter", configSetParameter);
 
 	ros::Subscriber set_sub = n.subscribe("set", 10, setCallback);
+	ros::Subscriber ConfigSetParameter_sub = n.subscribe("configSetParameter", 10, configSetParameterCallback);
 
 	ros::Rate loop_rate(30); //in hertz
 
