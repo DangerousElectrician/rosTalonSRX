@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
 
 	init_CANSend(CANSend_pub, CANRecv_cli);
 	motor = new CanTalonSRX(1);
-	CanTalonSRX motor2 (2);
 
 	double dparam; //variable declaration needs to be outside or else segfault
 	int param;
