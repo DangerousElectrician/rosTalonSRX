@@ -64,6 +64,7 @@ add_service_files(
 	CANRecv.srv
 	Set.srv
 	GetParameter.srv
+	ConfigSetParameter.srv
 )
 
 ## Generate actions in the 'action' folder
