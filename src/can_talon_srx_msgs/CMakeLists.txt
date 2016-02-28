@@ -49,6 +49,7 @@ add_message_files(
 	FILES
 	control.msg
 	status.msg
+	ConfigSetParameter.msg
 #   Message1.msg
 #   Message2.msg
  )
