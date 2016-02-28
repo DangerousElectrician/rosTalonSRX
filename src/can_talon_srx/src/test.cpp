@@ -8,6 +8,7 @@
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/Set.h"
+#include "can_talon_srx/GetParamResponse.h"
 #include "can_talon_srx_msgs/control.h"
 #include "can_talon_srx_msgs/status.h"
 
@@ -22,6 +23,13 @@ bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
 	return true;
 }
 
+bool getParamResponse(can_talon_srx::GetParamResponse::Request &req, can_talon_srx::GetParamResponse::Response &res) {
+	motor->RequestParam((CanTalonSRX::param_t)req.param);
+	ros::Duration(0.004).sleep();
+	motor->GetParamResponse((CanTalonSRX::param_t)req.param, res.value);
+	return true;
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "talontest");
 	ros::NodeHandle n;
@@ -31,6 +39,7 @@ int main(int argc, char **argv) {
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::status>("status", 10);
 	
 	ros::ServiceServer set_srv = n.advertiseService("set", set);
+	ros::ServiceServer getParamResponse_srv = n.advertiseService("getParamResponse", getParamResponse);
 
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 

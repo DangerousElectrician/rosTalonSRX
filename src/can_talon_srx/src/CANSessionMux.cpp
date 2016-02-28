@@ -72,15 +72,15 @@ extern "C"
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_readStreamSession(uint32_t sessionHandle, struct tCANStreamMessage *messages, uint32_t messagesToRead, uint32_t *messagesRead, int32_t *status) {
-		ROS_WARN("FRC_NetworkCommunication_CANSessionMux_readStreamSession not implemented");
+		ROS_WARN("FRC_NetworkCommunication_CANSessionMux_readStreamSession not fully implemented");
 		uint8_t data[8];
-		uint32_t *timeStamp = 0;
-		int32_t *mystatus = 0;
-		FRC_NetworkCommunication_CANSessionMux_receiveMessage(&_messageID, 0, messages->data, &messages->dataSize, timeStamp, mystatus);
+		uint32_t timeStamp = 0;
+		int32_t mystatus = 0;
+		uint8_t tmpdata[8];
+		uint8_t datasize;
+		FRC_NetworkCommunication_CANSessionMux_receiveMessage(&_messageID, 0, &messages->data[0], &datasize, &timeStamp, &mystatus);
 		messages->messageID = _messageID;
-		*messagesRead = 0;
-
-
+		*messagesRead = 1;
 	}
 
 	//void FRC_NetworkCommunication_CANSessionMux_getCANStatus(float *percentBusUtilization, uint32_t *busOffCount, uint32_t *txFullCount, uint32_t *receiveErrorCount, uint32_t *transmitErrorCount, int32_t *status);
