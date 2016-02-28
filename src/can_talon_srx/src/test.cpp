@@ -13,6 +13,17 @@
 #include "can_talon_srx_msgs/Status.h"
 #include "can_talon_srx_msgs/ConfigSetParameter.h"
 
+#include "can_talon_srx_msgs/SetDemand.h"
+#include "can_talon_srx_msgs/SetOverrideLimitSwitchEn.h"
+#include "can_talon_srx_msgs/SetFeedbackDeviceSelect.h"
+#include "can_talon_srx_msgs/SetRevMotDuringCloseLoopEn.h"
+#include "can_talon_srx_msgs/SetOverrideBrakeType.h"
+#include "can_talon_srx_msgs/SetModeSelect.h"
+#include "can_talon_srx_msgs/SetModeSelectAndDemand.h"
+#include "can_talon_srx_msgs/SetProfileSlotSelect.h"
+#include "can_talon_srx_msgs/SetRampThrottle.h"
+#include "can_talon_srx_msgs/SetRevFeedbackSensor.h"
+
 CanTalonSRX* motor;
 
 void setCallback(const can_talon_srx_msgs::Set::ConstPtr& control) {
@@ -22,6 +33,40 @@ void setCallback(const can_talon_srx_msgs::Set::ConstPtr& control) {
 void configSetParameterCallback(const can_talon_srx_msgs::ConfigSetParameter::ConstPtr& msg) {
 	motor->SetParam((CanTalonSRX::param_t) msg->param, msg->value);
 }
+
+
+
+void setDemandCallback(const can_talon_srx_msgs::			SetDemand::ConstPtr& msg) {
+	motor->SetDemand(msg->param);
+}
+void setOverrideLimitSwitchEnCallback(const can_talon_srx_msgs::        SetOverrideLimitSwitchEn::ConstPtr& msg) {
+	motor->SetOverrideLimitSwitchEn(msg->param);
+}
+void setFeedbackDeviceSelectCallback(const can_talon_srx_msgs::         SetFeedbackDeviceSelect::ConstPtr& msg) {
+	motor->SetFeedbackDeviceSelect(msg->param);
+}
+void setRevMotDuringCloseLoopEnCallback(const can_talon_srx_msgs::      SetRevMotDuringCloseLoopEn::ConstPtr& msg) {
+	motor->SetRevMotDuringCloseLoopEn(msg->param);
+}
+void setOverrideBrakeTypeCallback(const can_talon_srx_msgs::            SetOverrideBrakeType::ConstPtr& msg) {
+	motor->SetOverrideBrakeType(msg->param);
+}
+void setModeSelectCallback(const can_talon_srx_msgs::                   SetModeSelect::ConstPtr& msg) {
+	motor->SetModeSelect(msg->param);
+}
+void setModeSelectAndDemandCallback(const can_talon_srx_msgs::          SetModeSelectAndDemand::ConstPtr& msg) {
+	motor->SetModeSelect(msg->param, msg->demand);
+}
+void setProfileSlotSelectCallback(const can_talon_srx_msgs::            SetProfileSlotSelect::ConstPtr& msg) {
+	motor->SetProfileSlotSelect(msg->param);
+}
+void setRampThrottleCallback(const can_talon_srx_msgs::                 SetRampThrottle::ConstPtr& msg) {
+	motor->SetRampThrottle(msg->param);
+}
+void setRevFeedbackSensorCallback(const can_talon_srx_msgs::            SetRevFeedbackSensor::ConstPtr& msg) {
+	motor->SetRevFeedbackSensor(msg->param);
+}
+
 
 bool getParameter(can_talon_srx::GetParameter::Request &req, can_talon_srx::GetParameter::Response &res) {
 	motor->RequestParam((CanTalonSRX::param_t)req.param);
@@ -42,6 +87,28 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber set_sub = n.subscribe("set", 10, setCallback);
 	ros::Subscriber ConfigSetParameter_sub = n.subscribe("configSetParameter", 10, configSetParameterCallback);
+
+	ros::Subscriber setDemandCallback_sub = n.subscribe("setDemand", 10, setDemandCallback);
+	ros::Subscriber setOverrideLimitSwitchEnCallback_sub = n.subscribe("setOverrideLimitSwitchEn", 10, setOverrideLimitSwitchEnCallback);
+	ros::Subscriber setFeedbackDeviceSelectCallback_sub = n.subscribe("setFeedbackDeviceSelect", 10, setFeedbackDeviceSelectCallback);
+	ros::Subscriber setRevMotDuringCloseLoopEnCallback_sub = n.subscribe("setRevMotDuringCloseLoopEn", 10, setRevMotDuringCloseLoopEnCallback);
+	ros::Subscriber setOverrideBrakeTypeCallback_sub = n.subscribe("setOverrideBrakeType", 10, setOverrideBrakeTypeCallback);
+	ros::Subscriber setModeSelectCallback_sub = n.subscribe("setModeSelect", 10, setModeSelectCallback);
+	ros::Subscriber setModeSelectAndDemandCallback_sub = n.subscribe("setModeSelectAndDemandCallback", 10, setModeSelectAndDemandCallback);
+	ros::Subscriber setProfileSlotSelectCallback_sub = n.subscribe("setProfileSlotSelectCallback", 10, setProfileSlotSelectCallback);
+	ros::Subscriber setRampThrottleCallback_sub = n.subscribe("setRampThrottleCallback", 10, setRampThrottleCallback);
+	ros::Subscriber setRevFeedbackSensorCallback_sub = n.subscribe("setRevFeedbackSensorCallback", 10, setRevFeedbackSensorCallback);
+
+	// setDemandCallback
+	// setOverrideLimitSwitchEnCallback
+	// setFeedbackDeviceSelectCallback
+	// setRevMotDuringCloseLoopEnCallback
+	// setOverrideBrakeTypeCallback
+	// setModeSelectCallback
+	// setModeSelectAndDemandCallback
+	// setProfileSlotSelectCallback
+	// setRampThrottleCallback
+	// setRevFeedbackSensorCallback
 
 	ros::Rate loop_rate(30); //in hertz
 

@@ -1,4 +1,5 @@
 int32 param
+int32 demand
 
 int32 kThrottle = 0
 int32 kFollowerMode = 5

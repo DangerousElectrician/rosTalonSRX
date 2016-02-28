@@ -12,8 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 add_message_files(
 	FILES
-	Set.msg
 	Status.msg
+
+	Set.msg
 	ConfigSetParameter.msg
 	SetDemand.msg
 	SetOverrideLimitSwitchEn.msg
@@ -21,7 +22,7 @@ add_message_files(
 	SetRevMotDuringCloseLoopEn.msg
 	SetOverrideBrakeType.msg
 	SetModeSelect.msg
-	SetModeSelect.msg
+	SetModeSelectAndDemand.msg
 	SetProfileSlotSelect.msg
 	SetRampThrottle.msg
 	SetRevFeedbackSensor.msg

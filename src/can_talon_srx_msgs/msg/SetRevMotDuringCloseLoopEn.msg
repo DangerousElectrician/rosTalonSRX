@@ -1,1 +1,1 @@
-int32 RevMotDuringCloseLoopEn
+int32 param
