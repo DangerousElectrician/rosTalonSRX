@@ -9,6 +9,8 @@
 #include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/Set.h"
 #include "can_talon_srx/GetParameter.h"
+#include "can_talon_srx/ConfigSetParameter.h"
+
 #include "can_talon_srx_msgs/control.h"
 #include "can_talon_srx_msgs/status.h"
 
@@ -30,6 +32,11 @@ bool getParameter(can_talon_srx::GetParameter::Request &req, can_talon_srx::GetP
 	return true;
 }
 
+bool configSetParameter(can_talon_srx::ConfigSetParameter::Request &req, can_talon_srx::ConfigSetParameter::Response &res) {
+	motor->SetParam((CanTalonSRX::param_t) req.param, req.value);
+	return true;
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "talontest");
 	ros::NodeHandle n;
@@ -40,6 +47,7 @@ int main(int argc, char **argv) {
 	
 	ros::ServiceServer set_srv = n.advertiseService("set", set);
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
+	ros::ServiceServer configSetParameter_srv = n.advertiseService("configSetParameter", configSetParameter);
 
 	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
 
