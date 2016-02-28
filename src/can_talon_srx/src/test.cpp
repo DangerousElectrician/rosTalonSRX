@@ -25,7 +25,7 @@ bool set(can_talon_srx::Set::Request &req, can_talon_srx::Set::Response &res) {
 
 bool getParamResponse(can_talon_srx::GetParamResponse::Request &req, can_talon_srx::GetParamResponse::Response &res) {
 	motor->RequestParam((CanTalonSRX::param_t)req.param);
-	ros::Duration(0.004).sleep();
+	ros::Duration(0.04).sleep();
 	motor->GetParamResponse((CanTalonSRX::param_t)req.param, res.value);
 	return true;
 }

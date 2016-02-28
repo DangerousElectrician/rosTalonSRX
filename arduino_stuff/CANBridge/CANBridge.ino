@@ -89,7 +89,7 @@ void loop()
 	RXDataBuffer[RXDataBufferWriteIndex].size = rxData.size;
 	RXDataBuffer[RXDataBufferWriteIndex].packetcount = rxData.packetcount;
 	RXDataBuffer[RXDataBufferWriteIndex].canId = rxData.canId;
-        for(j = 0; j< rxData.size; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
+        for(j = 0; j< 8; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
 	RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
 
 	if(RXDataBufferWriteIndex < 9) RXDataBufferWriteIndex++;
