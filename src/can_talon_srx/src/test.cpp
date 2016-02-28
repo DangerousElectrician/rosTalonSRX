@@ -7,16 +7,16 @@
 
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANRecv.h"
-#include "can_talon_srx/Set.h"
+//#include "can_talon_srx/Set.h"
 #include "can_talon_srx/GetParameter.h"
 #include "can_talon_srx/ConfigSetParameter.h"
 
-#include "can_talon_srx_msgs/control.h"
-#include "can_talon_srx_msgs/status.h"
+#include "can_talon_srx_msgs/Set.h"
+#include "can_talon_srx_msgs/Status.h"
 
 CanTalonSRX* motor;
 
-void controlCallback(const can_talon_srx_msgs::control::ConstPtr& control) {
+void setCallback(const can_talon_srx_msgs::Set::ConstPtr& control) {
 	motor->Set(control->set);
 }
 
@@ -43,13 +43,13 @@ int main(int argc, char **argv) {
 
 	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
-	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::status>("status", 10);
+	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::Status>("status", 10);
 	
 	//ros::ServiceServer set_srv = n.advertiseService("set", set);
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
 	ros::ServiceServer configSetParameter_srv = n.advertiseService("configSetParameter", configSetParameter);
 
-	ros::Subscriber control_sub = n.subscribe("control", 10, controlCallback);
+	ros::Subscriber set_sub = n.subscribe("set", 10, setCallback);
 
 	ros::Rate loop_rate(30); //in hertz
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	double dparam; //variable declaration needs to be outside or else segfault
 	int param;
 	while(ros::ok()) {
-		can_talon_srx_msgs::status status_msg;
+		can_talon_srx_msgs::Status status_msg;
 
 		motor->GetFault_OverTemp(param);
 		status_msg.Fault_OverTemp = param;
