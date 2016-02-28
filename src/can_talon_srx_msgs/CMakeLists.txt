@@ -15,6 +15,16 @@ add_message_files(
 	Set.msg
 	Status.msg
 	ConfigSetParameter.msg
+	SetDemand.msg
+	SetOverrideLimitSwitchEn.msg
+	SetFeedbackDeviceSelect.msg
+	SetRevMotDuringCloseLoopEn.msg
+	SetOverrideBrakeType.msg
+	SetModeSelect.msg
+	SetModeSelect.msg
+	SetProfileSlotSelect.msg
+	SetRampThrottle.msg
+	SetRevFeedbackSensor.msg
  )
 
  generate_messages(
