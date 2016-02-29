@@ -237,6 +237,9 @@ int main(int argc, char **argv) {
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 
+	ros::AsyncSpinner spinner(2);
+	spinner.start();
+
 	ros::Rate r(500);
 
 	ROS_INFO("Waiting for arduino bootloader to finish");
@@ -267,7 +270,7 @@ int main(int argc, char **argv) {
 		//unsigned char header=255;
 		if(true) { //serialread(fd, &header, 1, 100) != 0) {
 			if(!skip) {
-				if(serialread(fd, &rxData.size, 15, 10) != -1) {
+				if(serialread(fd, &rxData.size, 15, 800) != -1) {
 					//rxData.size = header;
 					if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
@@ -322,8 +325,8 @@ int main(int argc, char **argv) {
 		//int bytes_avail;
 		//ioctl(fd, TIOCINQ, &bytes_avail);
 		//std::cout << "bytes_avail " << bytes_avail << std::endl;
-		r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
-		ros::spinOnce();
+		//r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
+		//ros::spinOnce();
 	}
 	write(fd, "w", 1);
 
