@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 	// setRampThrottleCallback
 	// setRevFeedbackSensorCallback
 
-	ros::Rate loop_rate(30); //in hertz
+	ros::Rate loop_rate(100); //in hertz
 
 	ros::AsyncSpinner spinner(1);
 	spinner.start();
@@ -209,8 +209,7 @@ int main(int argc, char **argv) {
 		status_msg.IsPulseWidthSensorPresent = param;
 
 		status_pub.publish(status_msg);
-		//ros::spin();
-		//ros::spinOnce();
+
 		loop_rate.sleep();
 	}
 }
