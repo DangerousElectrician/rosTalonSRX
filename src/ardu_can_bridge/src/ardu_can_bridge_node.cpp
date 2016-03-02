@@ -211,14 +211,10 @@ void flushSerial(int fd) {
 	int n;
 	int bytes_avail;
 	ioctl(fd, TIOCINQ, &bytes_avail);
-	//std::cout << "flushed "; 
 	while(bytes_avail > 0) {
-		//std::cout << "flush" << std::endl;
 		n = serialread (fd, buf, bytes_avail, 0);
 		ioctl(fd, TIOCINQ, &bytes_avail);
-		//std::cout << unsigned(buf[0]) << "\t" << std::flush;
 	}
-	//std::cout << std::endl;
 }
 
 
@@ -252,81 +248,57 @@ int main(int argc, char **argv) {
 	int prevPacketCount = 0;
 
 	char datagood = 1;
-	char skip = 0;
-	//write(fd, "q" ,1);
 	while(ros::ok()) {
 		RXData rxData;
 
-		//datagood = 1;
 		if(datagood) write(fd, "d", 1);
-		else { 
-		}
 
-		//if(!datagood) {
-		//	write(fd, "w", 1); //stop stream and ask for repeat
-		//	write(fd, "r", 1);
-		//}
+		if(serialread(fd, &rxData.size, 15, 800) != -1) {
+			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-		//unsigned char header=255;
-		if(true) { //serialread(fd, &header, 1, 100) != 0) {
-			if(!skip) {
-				if(serialread(fd, &rxData.size, 15, 800) != -1) {
-					//rxData.size = header;
-					if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
+				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+				for(int j = 0; j < rxData.size; j++) {
+					std::cout << unsigned(rxData.bytes[j]) << " ";
+				}
+				std::cout << std::endl << std::flush;
 
-						std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-						for(int j = 0; j < rxData.size; j++) {
-							std::cout << unsigned(rxData.bytes[j]) << " ";
-						}
-						std::cout << std::endl << std::flush;
+				can_talon_srx::CANData data;
+				data.arbID = rxData.arbID;
+				data.size = rxData.size;
+				data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
 
-						can_talon_srx::CANData data;
-						data.arbID = rxData.arbID;
-						data.size = rxData.size;
-						data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
+				receivedCAN[data.arbID] = data;
+				if(!datagood) {
+					datagood = 1;
+				}
 
-						receivedCAN[data.arbID] = data;
-						if(!datagood) {
-							datagood = 1;
-							//write(fd, "q", 1); //restart stream
-						}
+				//for(int j = 0; j < 15; j++) {
+				//	std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
+				//}
+				//std::cout << std::endl<< std::flush;
 
-						//for(int j = 0; j < 15; j++) {
-						//	std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
-						//}
-						//std::cout << std::endl<< std::flush;
-
-						if(goodPackets != 0 && rxData.packetcount - 1 != prevPacketCount && rxData.packetcount != prevPacketCount) {
-							int tmppacketcount = rxData.packetcount - prevPacketCount;
-							if(tmppacketcount > 0) {
-								missedPackets += (unsigned char)(tmppacketcount - 1);
-							}
-							//std::cout<< "prevPacketCount: " << unsigned(prevPacketCount) << std::endl;
-							//std::cout << "missed: " << unsigned((unsigned char)(rxData.packetcount - prevPacketCount -1 )) << std::endl;
-						}
-						prevPacketCount = rxData.packetcount;
-						goodPackets++;
-
-					} else {
-						for(int j = 0; j < 15; j++) {
-							std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
-						}
-						std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
-						std::cout << std::endl<< std::flush;
-						datagood = 0;
-						//skip = 1;
-						//flushSerial(fd);
-			flushSerial(fd);
-			write(fd, "r", 1);
+				if(goodPackets != 0 && rxData.packetcount - 1 != prevPacketCount && rxData.packetcount != prevPacketCount) {
+					int tmppacketcount = rxData.packetcount - prevPacketCount;
+					if(tmppacketcount > 0) {
+						missedPackets += (unsigned char)(tmppacketcount - 1);
 					}
-				} //else flushSerial(fd);
-			} else skip = 0;
+					//std::cout<< "prevPacketCount: " << unsigned(prevPacketCount) << std::endl;
+					//std::cout << "missed: " << unsigned((unsigned char)(rxData.packetcount - prevPacketCount -1 )) << std::endl;
+				}
+				prevPacketCount = rxData.packetcount;
+				goodPackets++;
+
+			} else {
+				for(int j = 0; j < 15; j++) {
+					std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
+				}
+				std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
+				std::cout << std::endl<< std::flush;
+				datagood = 0;
+				flushSerial(fd);
+				write(fd, "r", 1);
+			}
 		}
-		//int bytes_avail;
-		//ioctl(fd, TIOCINQ, &bytes_avail);
-		//std::cout << "bytes_avail " << bytes_avail << std::endl;
-		//r.sleep();  //sending stuff over serial too quickly is bad. figure out a better way for flow control
-		//ros::spinOnce();
 	}
 	write(fd, "w", 1);
 
