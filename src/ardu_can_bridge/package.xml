@@ -36,16 +36,18 @@
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
+  <run_depend>message_runtime</run_depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>can_talon_srx</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>joy</build_depend>
+  <build_depend>ardu_can_bridge_msgs</build_depend>
   <run_depend>can_talon_srx</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>joy</run_depend>
+  <run_depend>ardu_can_bridge_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
