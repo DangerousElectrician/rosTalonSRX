@@ -2,6 +2,8 @@
 #include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/CANSend.h"
 #include "can_talon_srx/CANData.h"
+#include "ardu_can_bridge_msgs/CANSend.h"
+#include "ardu_can_bridge_msgs/CANData.h"
 #include "crc8_table.h"
 #include <vector>
 #include <map>
@@ -232,6 +234,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
+	ros::Publisher CANRecv_pub = n.advertise<ardu_can_bridge_msgs::CANData>("CANRecv", 100);
 
 	ros::AsyncSpinner spinner(2);
 	spinner.start();
@@ -271,6 +274,12 @@ int main(int argc, char **argv) {
 				if(!datagood) {
 					datagood = 1;
 				}
+
+				ardu_can_bridge_msgs::CANData msg;
+				msg.arbID = rxData.arbID;
+				msg.size = rxData.size;
+				msg.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
+				CANRecv_pub.publish(msg);
 
 				//for(int j = 0; j < 15; j++) {
 				//	std::cout << unsigned(*((unsigned char*)(&rxData)+j)) << "\t" << std::flush;
