@@ -1,2 +1,2 @@
-can_talon_srx/CANData data
+ardu_can_bridge_msgs/CANData data
 int32 periodMs
