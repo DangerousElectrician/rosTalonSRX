@@ -10,14 +10,13 @@
 extern "C"
 {
 #endif  
-	ros::Publisher *CANSend_pub;
-	ros::ServiceClient *CANRecv_cli;
-	ros::NodeHandle *n;
+	ros::Publisher CANSend_pub;
+	ros::ServiceClient CANRecv_cli;
+	//ros::NodeHandle *n;
 
-	void init_CANSend(ros::Publisher CANSend_ros_pub, ros::ServiceClient CANRecv_ros_cli, ros::NodeHandle nh) {
-		CANSend_pub = &CANSend_ros_pub;
-		CANRecv_cli = &CANRecv_ros_cli;
-		n = &nh;
+	void init_CANSend(ros::NodeHandle n) {
+		CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
+		CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
@@ -28,7 +27,7 @@ extern "C"
 		std::vector<uint8_t> candata(data, data+dataSize);
 		msg.data.bytes = candata;
 		msg.periodMs = periodMs;
-		CANSend_pub->publish(msg);
+		CANSend_pub.publish(msg);
 
 		//std::cout << "sendCAN " << messageID << "\t";
 		//for(int i = 0; i < dataSize; i++) {
@@ -41,7 +40,7 @@ extern "C"
 		//std::cout << "recvCAN " << *messageID << std::endl;
 		can_talon_srx::CANRecv srv;
 		srv.request.arbID = *messageID;
-		if(CANRecv_cli->call(srv)) {
+		if(CANRecv_cli.call(srv)) {
 			//ROS_INFO("sent CANRecv");
 			//ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
 			*dataSize = srv.response.data.size;
