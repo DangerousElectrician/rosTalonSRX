@@ -2,9 +2,22 @@
 #include "FRC_NetworkCommunication/CANSessionMux.h"
 #include "can_talon_srx/CANSend.h" //don't put this in the header file, it causes strange issues when building
 #include "can_talon_srx/CANRecv.h"
+#include "ardu_can_bridge_msgs/CANData.h"
 
 #include <iostream>
 #include <vector>
+#include <map>
+#include <iterator>
+
+std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
+
+void CANRecvCallback(const ardu_can_bridge_msgs::CANData::ConstPtr& msg) {
+	can_talon_srx::CANData data;
+	data.arbID = msg->arbID;
+	data.size = msg->size;
+	data.bytes = msg->bytes;
+	receivedCAN[msg->arbID] = data;
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -12,11 +25,13 @@ extern "C"
 #endif  
 	ros::Publisher CANSend_pub;
 	ros::ServiceClient CANRecv_cli;
+	ros::Subscriber CANRecv_sub;
 	//ros::NodeHandle *n;
 
 	void init_CANSend(ros::NodeHandle n) {
 		CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 		CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
+		CANRecv_sub = n.subscribe("CANRecv", 100, CANRecvCallback);
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
@@ -38,18 +53,30 @@ extern "C"
 
 	void FRC_NetworkCommunication_CANSessionMux_receiveMessage(uint32_t *messageID, uint32_t messageIDMask, uint8_t *data, uint8_t *dataSize, uint32_t *timeStamp, int32_t *status) {
 		//std::cout << "recvCAN " << *messageID << std::endl;
-		can_talon_srx::CANRecv srv;
-		srv.request.arbID = *messageID;
-		if(CANRecv_cli.call(srv)) {
-			//ROS_INFO("sent CANRecv");
-			//ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
-			*dataSize = srv.response.data.size;
-			*status = srv.response.status;
-			std::copy(srv.response.data.bytes.begin(), srv.response.data.bytes.begin()+*dataSize, data);
+		//can_talon_srx::CANRecv srv;
+		//srv.request.arbID = *messageID;
+
+		std::map<uint32_t, can_talon_srx::CANData>::iterator i = receivedCAN.find(*messageID);
+		if(i == receivedCAN.end()) {
+			*status = 1;
 		} else {
-			ROS_ERROR("no CANRecv service");
-			*status = 2;
+			*dataSize = receivedCAN[*messageID].size;
+			*status = 0;
+			std::copy(receivedCAN[*messageID].bytes.begin(), receivedCAN[*messageID].bytes.begin() + *dataSize, data);
 		}
+
+
+
+		//if(CANRecv_cli.call(srv)) {
+		//	//ROS_INFO("sent CANRecv");
+		//	//ROS_INFO("recv arbID: %ld", (long int)srv.response.data.arbID);
+		//	*dataSize = srv.response.data.size;
+		//	*status = srv.response.status;
+		//	std::copy(srv.response.data.bytes.begin(), srv.response.data.bytes.begin()+*dataSize, data);
+		//} else {
+		//	ROS_ERROR("no CANRecv service");
+		//	*status = 2;
+		//}
 		//for(int i = 0; i < *dataSize; i++) {
 		//	std::cout << unsigned(data[i]) << "\t";
 		//}
