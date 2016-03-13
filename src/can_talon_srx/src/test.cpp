@@ -82,6 +82,9 @@ int main(int argc, char **argv) {
 	ros::Publisher CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
 	ros::ServiceClient CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::Status>("status", 10);
+
+	init_CANSend(CANSend_pub, CANRecv_cli, n);
+	motor = new CanTalonSRX(1);
 	
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
 
@@ -115,8 +118,6 @@ int main(int argc, char **argv) {
 	ros::AsyncSpinner spinner(1);
 	spinner.start();
 
-	init_CANSend(CANSend_pub, CANRecv_cli);
-	motor = new CanTalonSRX(1);
 
 	double dparam; //variable declaration needs to be outside or else segfault
 	int param;

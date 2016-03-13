@@ -12,10 +12,12 @@ extern "C"
 #endif  
 	ros::Publisher *CANSend_pub;
 	ros::ServiceClient *CANRecv_cli;
+	ros::NodeHandle *n;
 
-	void init_CANSend(ros::Publisher CANSend_ros_pub, ros::ServiceClient CANRecv_ros_cli) {
+	void init_CANSend(ros::Publisher CANSend_ros_pub, ros::ServiceClient CANRecv_ros_cli, ros::NodeHandle nh) {
 		CANSend_pub = &CANSend_ros_pub;
 		CANRecv_cli = &CANRecv_ros_cli;
+		n = &nh;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
