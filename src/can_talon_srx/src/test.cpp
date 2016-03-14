@@ -84,7 +84,11 @@ int main(int argc, char **argv) {
 	ros::Publisher status_pub = n.advertise<can_talon_srx_msgs::Status>("status", 10);
 
 	init_CANSend(n);
-	motor = new CanTalonSRX(1);
+	ros::NodeHandle privn("~");
+	int talonNumber;
+	privn.param("talonNumber", talonNumber, 1);
+	motor = new CanTalonSRX(talonNumber);
+	std::cout << talonNumber << std::endl;
 	
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
 
