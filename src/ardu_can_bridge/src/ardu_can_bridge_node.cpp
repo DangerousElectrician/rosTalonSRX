@@ -227,8 +227,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	ros::NodeHandle nh("~");
 
-	std::string device = "/dev/ttyACM0";
-	nh.getParam("port", device);
+	std::string device;
+	nh.param<std::string>("port", device, "/dev/ttyACM0");
 	while(fd == -1 && ros::ok()) {
 		fd = open_port(device);
 		if (fd == -1) ros::Duration(.5).sleep();
