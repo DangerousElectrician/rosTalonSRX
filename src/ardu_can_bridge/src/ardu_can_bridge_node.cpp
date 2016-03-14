@@ -39,7 +39,6 @@ char usedIndex[50] = {0};
  * Returns the file descriptor on success or -1 on error.
  */
 
-int fd = 0;
 
 int open_port(std::string dev) {
 	int fd; /* File descriptor for the port */
@@ -229,7 +228,11 @@ int main(int argc, char **argv) {
 
 	std::string device = "/dev/ttyACM0";
 	nh.getParam("port", device);
-	fd = open_port(device);
+	int fd = -1;
+	while(fd == -1) {
+		fd = open_port(device);
+		if (fd == -1) ros::Duration(.5).sleep();
+	}
 
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
@@ -242,7 +245,7 @@ int main(int argc, char **argv) {
 	ros::Rate r(500);
 
 	ROS_INFO("Waiting for arduino bootloader to finish");
-	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory
+	ros::Duration(2).sleep(); //THIS DELAY IS IMPORTANT the arduino bootloader has a tendency to obliterate its memory because the DTR line resets the Arduino
 
 	ROS_INFO("Starting communications");
 
