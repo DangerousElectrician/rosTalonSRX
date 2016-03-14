@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
 
 	std::string device = "/dev/ttyACM0";
 	nh.getParam("port", device);
-	while(fd == -1) {
+	while(fd == -1 && ros::ok()) {
 		fd = open_port(device);
 		if (fd == -1) ros::Duration(.5).sleep();
 	}
