@@ -21,6 +21,7 @@
 #define BAUD B115200
 #define PORT "/dev/ttyACM0"
 
+int fd = -1;
 std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
 
 struct txCANData {
@@ -228,7 +229,6 @@ int main(int argc, char **argv) {
 
 	std::string device = "/dev/ttyACM0";
 	nh.getParam("port", device);
-	int fd = -1;
 	while(fd == -1) {
 		fd = open_port(device);
 		if (fd == -1) ros::Duration(.5).sleep();
