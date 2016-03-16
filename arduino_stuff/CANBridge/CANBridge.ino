@@ -3,9 +3,7 @@
 #include "mcp_can.h"
 #include "crc8_table.h"
 
-#define BYTEMASK B11111111
-
-INT8U registers[] = {
+INT8U registers[] = { //list of mcp2515 registers for debugging
 MCP_RXF0SIDH,
 MCP_RXF0SIDL,
 MCP_RXF0EID8,
@@ -72,7 +70,7 @@ void setup()
 
 START_INIT:
 
-  if (CAN_OK == CAN.begin(CAN_1000KBPS))                  // init can bus : baudrate = 500k
+  if (CAN_OK == CAN.begin(CAN_1000KBPS))                  
   {
     //Serial.println("CAN BUS Shield init ok!");
   }
@@ -84,13 +82,13 @@ START_INIT:
     goto START_INIT;
   }
 
-  CAN.init_Mask(0, 1, 0);
+  CAN.init_Mask(0, 1, 0); //set message filter to let everything through
   CAN.init_Filt(0, 1, 0);
 
   //CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
 }
 
-struct RXData {
+struct RXData { //struct for storing received CAN messages
   unsigned char size = 0;
   unsigned char packetcount = 0;
   INT32U canId;
@@ -98,7 +96,7 @@ struct RXData {
   unsigned char checksum = 42;
 };
 
-struct TXData {
+struct TXData { //struct for storing CAN messages to send received from the serial port
   unsigned char size = 0;
   unsigned char index = 0;
   long periodMs = -1;
@@ -107,7 +105,7 @@ struct TXData {
   unsigned char checksum = 42;
 };
 
-struct TXCANData {
+struct TXCANData { //stores messages for periodic sending
   unsigned char size = 0;
   unsigned char bytes[8];
   INT32U canId;
@@ -134,7 +132,7 @@ int j = 0;
 void loop()
 {
   if (CAN_MSGAVAIL == CAN.checkReceive())           // check if data coming
-  {
+  {						// put received CAN messages in the buffer
     CAN.readMsgBuf(&rxData.size, rxData.bytes);
 
     rxData.canId = CAN.getCanId();
@@ -153,11 +151,11 @@ void loop()
 
   }
 
-  if (keepalive)
+  if (keepalive) // send messages only if the host computer has talked recently
   {
-    for (j = 0; j < 50; j++)
+    for (j = 0; j < 50; j++)		// send all periodic messages
     {
-      if (txarr[j].periodMs >= 0)
+      if (txarr[j].periodMs >= 0) // do not send messages with a -1 period
       {
         CAN.sendMsgBuf(txarr[j].canId, 1, txarr[j].size, txarr[j].bytes);
         if (txarr[j].periodMs == 0) txarr[j].periodMs = -1;
@@ -167,12 +165,13 @@ void loop()
   }
   else
   {
-    for (j = 0; j < 50; j++)
+    for (j = 0; j < 50; j++) // set all message periods to -1 if no communications from host
     {
       txarr[j].periodMs = -1;
     }
   }
 
+  // send received CAN messages to computer if stream mode is enabled
   if (stream && RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
   {
     Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
@@ -186,7 +185,7 @@ void loop()
     command = Serial.read();
     switch (command)
     {
-      case 'd':
+      case 'd': // send received CAN messages to host
         if (RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
         {
           Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
@@ -197,7 +196,7 @@ void loop()
         keepalive = 255;
         break;
 
-      case 'r': //resend message
+      case 'r': //resend message in case there is an error
         if (RXDataBufferReadIndex < 1)
         {
           Serial.write((unsigned char*) &RXDataBuffer[9 + RXDataBufferReadIndex], 15);
@@ -208,15 +207,15 @@ void loop()
         }
         break;
 
-      case 'q':
+      case 'q': // start streaming received messages
         stream = 1;
         break;
 
-      case 'w':
+      case 'w': // stop message stream
         stream = 0;
         break;
 
-      case 'g':
+      case 'g': // dump configuration of mcp2515 to serial. Used for debugging the filters
 	CAN.mcp2515_setCANCTRL_Mode(MODE_CONFIG);
 	delay(10);
 	for(int i = 0; i < sizeof(registers); i++)
@@ -230,7 +229,7 @@ void loop()
 	CAN.mcp2515_setCANCTRL_Mode(MODE_NORMAL);
         break;
 
-      case 0:
+      case 0: // host wants to send a message
       case 1:
       case 2:
       case 3:
@@ -243,14 +242,14 @@ void loop()
         while (Serial.available() < 18);
         Serial.readBytes((char*)&txData.index, 18);
 
-        if (txData.size > 8) break;
-        if (txData.checksum != 42) break;
+        //if (txData.size > 8) break; // size greater than 8 is an error
+        if (txData.checksum != 42) break; //placeholder checksum check
 
-        if (txData.periodMs == 0)
+        if (txData.periodMs == 0) // send one-shot message
         {
           CAN.sendMsgBuf(txData.canId, 1, txData.size, txData.bytes);
         }
-        else
+        else // put message in transmit buffer for periodic sending
         {
           txarr[txData.index].size = txData.size;
           txarr[txData.index].periodMs = txData.periodMs;
@@ -284,13 +283,9 @@ void loop()
 
         break;
 
-	case '?':
+	case '?': // respond with name
 		Serial.println("CANBRIDGE");
 		break;
     }
   }
 }
-
-/*********************************************************************************************************
-  END FILE
-*********************************************************************************************************/
