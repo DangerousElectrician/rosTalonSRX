@@ -29,9 +29,13 @@ extern "C"
 	//ros::NodeHandle *n;
 
 	void init_CANSend(ros::NodeHandle n) {
-		CANSend_pub = n.advertise<can_talon_srx::CANSend>("CANSend",100);
-		CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>("CANRecv");
-		CANRecv_sub = n.subscribe("CANRecv", 100, CANRecvCallback);
+		ros::NodeHandle privn("~");
+		std::string can_bridge_name;
+		privn.param<std::string>("can_bridge_name", can_bridge_name, "");
+		CANSend_pub = n.advertise<can_talon_srx::CANSend>(can_bridge_name + "/CANSend", 100);
+		//CANRecv_cli = n.serviceClient<can_talon_srx::CANRecv>(can_bridge_name.append("CANRecv"));
+		CANRecv_sub = n.subscribe(can_bridge_name + "/CANRecv", 100, CANRecvCallback);
+		std::cout << "can_bridge_name:\t" << can_bridge_name <<std::endl;
 	}
 
 	void FRC_NetworkCommunication_CANSessionMux_sendMessage(uint32_t messageID, const uint8_t *data, uint8_t dataSize, int32_t periodMs, int32_t *status) {
