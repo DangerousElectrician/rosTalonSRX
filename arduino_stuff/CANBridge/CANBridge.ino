@@ -84,6 +84,9 @@ START_INIT:
     goto START_INIT;
   }
 
+  CAN.init_Mask(0, 1, 0);
+  CAN.init_Filt(0, 1, 0);
+
   //CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
 }
 
