@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 	init_CANSend(n);
 	ros::NodeHandle privn("~");
 	int talonNumber;
-	privn.param("talonNumber", talonNumber, 1);
+	privn.param("talon_number", talonNumber, 1);
 	motor = new CanTalonSRX(talonNumber);
 	std::cout << talonNumber << std::endl;
 	
