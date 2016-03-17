@@ -212,6 +212,8 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	serialread(fd, &tmp, 1, 800);
 	if(tmp != 'b') {
 		std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
+	} else {
+		std::cout << "arduino tx received correct" << std::endl;
 	}
 }
 
