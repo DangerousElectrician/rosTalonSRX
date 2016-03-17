@@ -138,7 +138,7 @@ bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Respo
 
 int lockIndex() {
 	for(int i = 0; i < (int) sizeof(usedIndex); i++) { //ycm says that comparing an int and an unsigned long is bad
-		if(usedIndex[i]) {
+		if(usedIndex[i]) { // do nothing if index is used
 			
 		} else {
 			usedIndex[i] = 1;
@@ -150,6 +150,18 @@ int lockIndex() {
 
 void releaseIndex(int index) {
 	usedIndex[index] = 0;
+}
+
+
+void flushSerial(int fd) {
+	unsigned char buf [100];
+	int n;
+	int bytes_avail;
+	ioctl(fd, TIOCINQ, &bytes_avail);
+	while(bytes_avail > 0) {
+		n = serialread (fd, buf, bytes_avail, 0);
+		ioctl(fd, TIOCINQ, &bytes_avail);
+	}
 }
 
 struct TXData {
@@ -189,13 +201,18 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	}
 
 	//ROS_INFO("send size: %ld index: %ld", (long int) txdata.data.size, (long int)txdata.index);
+	char tmp;
+	flushSerial(fd);
 	write(fd, &txdata.data.size, 1);
 	write(fd, &txdata.index, 1);
 	write(fd, &txdata.periodMs, 4);
 	write(fd, &txdata.data.arbID, 4); 
 	write(fd, &txdata.data.bytes[0], 8);
-	write(fd, &txdata.checksum, 1);	
-	ros::Duration(0.001).sleep();
+	write(fd, &txdata.checksum, 1);
+	serialread(fd, &tmp, 1, 800);
+	if(tmp != 'b') {
+		std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
+	}
 }
 
 struct RXData {
@@ -208,18 +225,6 @@ struct RXData {
 	unsigned char bytes[8];
 	unsigned char checksum;
 };
-
-void flushSerial(int fd) {
-	unsigned char buf [100];
-	int n;
-	int bytes_avail;
-	ioctl(fd, TIOCINQ, &bytes_avail);
-	while(bytes_avail > 0) {
-		n = serialread (fd, buf, bytes_avail, 0);
-		ioctl(fd, TIOCINQ, &bytes_avail);
-	}
-}
-
 
 int main(int argc, char **argv) {
 
@@ -263,11 +268,11 @@ int main(int argc, char **argv) {
 		if(serialread(fd, &rxData.size, 15, 800) != -1) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				for(int j = 0; j < rxData.size; j++) {
-					std::cout << unsigned(rxData.bytes[j]) << " ";
-				}
-				std::cout << std::endl << std::flush;
+				//std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+				//for(int j = 0; j < rxData.size; j++) {
+				//	std::cout << unsigned(rxData.bytes[j]) << " ";
+				//}
+				//std::cout << std::endl << std::flush;
 
 				can_talon_srx::CANData data;
 				data.arbID = rxData.arbID;

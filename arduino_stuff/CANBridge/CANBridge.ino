@@ -3,6 +3,8 @@
 #include "mcp_can.h"
 #include "crc8_table.h"
 
+#define TXBUFFERSIZE 50
+
 INT8U registers[] = { //list of mcp2515 registers for debugging
 MCP_RXF0SIDH,
 MCP_RXF0SIDL,
@@ -111,7 +113,7 @@ struct TXCANData { //stores messages for periodic sending
   INT32U canId;
   long periodMs = -1;
 };
-TXCANData txarr[50];
+TXCANData txarr[TXBUFFERSIZE];
 
 RXData rxData;
 TXData txData;
@@ -153,7 +155,7 @@ void loop()
 
   if (keepalive) // send messages only if the host computer has talked recently
   {
-    for (j = 0; j < 50; j++)		// send all periodic messages
+    for (j = 0; j < TXBUFFERSIZE; j++)		// send all periodic messages
     {
       if (txarr[j].periodMs >= 0) // do not send messages with a -1 period
       {
@@ -161,11 +163,11 @@ void loop()
         if (txarr[j].periodMs == 0) txarr[j].periodMs = -1;
       }
     }
-    keepalive--;
+    //keepalive--;
   }
   else
   {
-    for (j = 0; j < 50; j++) // set all message periods to -1 if no communications from host
+    for (j = 0; j < TXBUFFERSIZE; j++) // set all message periods to -1 if no communications from host
     {
       txarr[j].periodMs = -1;
     }
@@ -229,6 +231,27 @@ void loop()
 	CAN.mcp2515_setCANCTRL_Mode(MODE_NORMAL);
         break;
 
+	case 'h':
+		Serial.println("\n");
+	    for (j = 0; j < TXBUFFERSIZE; j++)		// send all periodic messages
+	    {
+	    	Serial.print("per ");
+	      Serial.print(txarr[j].periodMs);
+	      Serial.print("\tcanId ");
+	      Serial.print(txarr[j].canId);
+	      Serial.print("\tsize ");
+	      Serial.print(txarr[j].size);
+	      Serial.print(" data ");
+	      for (int i=0; i<8; i++)
+	      {
+	      	Serial.print(txarr[j].bytes[i]);
+		Serial.print(" ");
+	}
+		Serial.println();
+	    }
+		Serial.println("\n");
+		break;
+
       case 0: // host wants to send a message
       case 1:
       case 2:
@@ -243,7 +266,15 @@ void loop()
         Serial.readBytes((char*)&txData.index, 18);
 
         //if (txData.size > 8) break; // size greater than 8 is an error
-        if (txData.checksum != 42) break; //placeholder checksum check
+        if (txData.checksum != 42) //placeholder checksum check
+	{
+		Serial.write('n');
+		break;
+	}
+	else
+	{
+		Serial.write('b');
+	}
 
         if (txData.periodMs == 0) // send one-shot message
         {
