@@ -1,6 +1,25 @@
 <launch>
-	<node name="ardu_can_bridge" pkg="ardu_can_bridge" type="ardu_can_bridge_node"/>
-	<node name="can_talon_srx" pkg="can_talon_srx" type="can_talon_srx_node"/>
-	<node name="joy" pkg="joy" type="joy_node"/>
-	<node name="can_talon_srx_test" pkg="can_talon_srx_test" type="can_talon_srx_test.py"/>
+	<group ns="motor1">
+		<node name="can_talon_srx" pkg="can_talon_srx" type="can_talon_srx_node">
+			<param name="talon_number" type="int" value="1" />
+			<remap from="CANSend" to="/CANSend"/>
+			<remap from="CANRecv" to="/CANRecv"/>
+		</node>
+	</group>
+
+	<group ns="motor2">
+		<node name="can_talon_srx" pkg="can_talon_srx" type="can_talon_srx_node">
+			<param name="talon_number" type="int" value="2" />
+			<remap from="CANSend" to="/CANSend"/>
+			<remap from="CANRecv" to="/CANRecv"/>
+		</node>
+	</group>
+
+	<group ns="motor3">
+		<node name="can_talon_srx" pkg="can_talon_srx" type="can_talon_srx_node">
+			<param name="talon_number" type="int" value="3" />
+			<remap from="CANSend" to="/CANSend"/>
+			<remap from="CANRecv" to="/CANRecv"/>
+		</node>
+	</group>
 </launch>
