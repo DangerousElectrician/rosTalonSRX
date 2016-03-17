@@ -195,6 +195,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	write(fd, &txdata.data.arbID, 4); 
 	write(fd, &txdata.data.bytes[0], 8);
 	write(fd, &txdata.checksum, 1);	
+	ros::Duration(0.001).sleep();
 }
 
 struct RXData {
