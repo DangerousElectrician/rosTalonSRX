@@ -159,6 +159,7 @@ void flushSerial(int fd) {
 	int bytes_avail;
 	ioctl(fd, TIOCINQ, &bytes_avail);
 	while(bytes_avail > 0) {
+		if(bytes_avail >= 100) bytes_avail = 99;
 		n = serialread (fd, buf, bytes_avail, 0);
 		ioctl(fd, TIOCINQ, &bytes_avail);
 	}
@@ -202,19 +203,40 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 
 	//ROS_INFO("send size: %ld index: %ld", (long int) txdata.data.size, (long int)txdata.index);
 	char tmp;
-	flushSerial(fd);
-	write(fd, &txdata.data.size, 1);
-	write(fd, &txdata.index, 1);
-	write(fd, &txdata.periodMs, 4);
-	write(fd, &txdata.data.arbID, 4); 
-	write(fd, &txdata.data.bytes[0], 8);
-	write(fd, &txdata.checksum, 1);
-	serialread(fd, &tmp, 1, 800);
-	if(tmp != 'b') {
-		std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
-	} else {
-		std::cout << "arduino tx received correct" << std::endl;
-	}
+	int trycnt = 0;
+	do {
+		write(fd, &txdata.data.size, 1);
+		write(fd, &txdata.index, 1);
+		write(fd, &txdata.periodMs, 4);
+		write(fd, &txdata.data.arbID, 4); 
+		write(fd, &txdata.data.bytes[0], 8);
+		write(fd, &txdata.checksum, 1);
+
+			//ros::Duration(0.1).sleep();
+		int outputbytes;
+		do {
+			ioctl(fd, TIOCOUTQ, &outputbytes);
+			//std::cout << "outputbytes " << outputbytes << std::endl;
+		} while(outputbytes > 0);
+		//flushSerial(fd);
+
+
+		int bytes_avail;
+		do {
+			serialread(fd, &tmp, 1, 10000);
+			ioctl(fd, TIOCINQ, &bytes_avail);
+			//std::cout << "loop " << bytes_avail<< std::endl;
+		} while(bytes_avail > 0  && tmp!='b' && tmp!='n');
+
+		if(tmp != 'b') {
+			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
+			trycnt++;
+		} else {
+			std::cout << "arduino tx received correct" << std::endl;
+			trycnt = 999;
+		}
+	} while(tmp != 'b' && trycnt < 100);
+
 }
 
 struct RXData {
@@ -239,7 +261,7 @@ int main(int argc, char **argv) {
 	nh.param<std::string>("port", device, "/dev/ttyACM0");
 	while(fd == -1 && ros::ok()) {
 		fd = open_port(device);
-		if (fd == -1) ros::Duration(.5).sleep();
+		if (fd == -1) ros::Duration(1).sleep();
 	}
 
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
@@ -247,8 +269,8 @@ int main(int argc, char **argv) {
 	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 	ros::Publisher CANRecv_pub = n.advertise<ardu_can_bridge_msgs::CANData>("CANRecv", 100);
 
-	ros::AsyncSpinner spinner(2);
-	spinner.start();
+	//ros::AsyncSpinner spinner(2);
+	//spinner.start();
 
 	ros::Rate r(500);
 
@@ -266,6 +288,7 @@ int main(int argc, char **argv) {
 		RXData rxData;
 
 		if(datagood) write(fd, "d", 1);
+		else write(fd, "r", 1);
 
 		if(serialread(fd, &rxData.size, 15, 800) != -1) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
@@ -315,10 +338,13 @@ int main(int argc, char **argv) {
 				std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
 				std::cout << std::endl<< std::flush;
 				datagood = 0;
+				//std::cout << "p1" << std::endl;
 				flushSerial(fd);
-				write(fd, "r", 1);
+				//std::cout << "p2" << std::endl;
+				//std::cout << "p3" << std::endl;
 			}
 		}
+		ros::spinOnce();
 	}
 	write(fd, "w", 1);
 
