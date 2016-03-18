@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include "mcp_can.h"
 #include "crc8_table.h"
+#include <avr/wdt.h>
 
 #define TXBUFFERSIZE 10
 
@@ -87,6 +88,8 @@ START_INIT:
   CAN.init_Mask(0, 1, 0); //set message filter to let everything through
   CAN.init_Filt(0, 1, 0);
 
+
+	wdt_enable(WDTO_1S);
   //CAN.sendMsgBuf( (INT32U)0x2040000, 1, 8, stmp0); //some random activity to make the talon go into CAN mode
 }
 
@@ -133,6 +136,9 @@ int j = 0;
 
 void loop()
 {
+
+	wdt_reset();
+
   if (CAN_MSGAVAIL == CAN.checkReceive())           // check if data coming
   {						// put received CAN messages in the buffer
     CAN.readMsgBuf(&rxData.size, rxData.bytes);
@@ -163,7 +169,7 @@ void loop()
         if (txarr[j].periodMs == 0) txarr[j].periodMs = -1;
       }
     }
-    //keepalive--;
+    keepalive--;
   }
   else
   {
@@ -266,31 +272,31 @@ void loop()
         Serial.readBytes((char*)&txData.index, 18);
 
         //if (txData.size > 8) break; // size greater than 8 is an error
-        if (txData.checksum != 42) //placeholder checksum check
-	{
-		while(Serial.available()>0) Serial.read();
-		//Serial.write('n');
+        if (txData.checksum != crc_update(0, &txData.size, 18)) // checksum check
+	{ // there was an error
+		while(Serial.available()>0) Serial.read(); // clear input buffer
+		Serial.write(21); //nak
 		//Serial.print("\nchecksum ");
 		//Serial.print(txData.checksum);
 		//Serial.println("\n");
 		break;
 	}
-	else
+	else // data is good
 	{
-		Serial.write('b');
+		if (txData.periodMs == 0) // send one-shot message
+		{
+		  CAN.sendMsgBuf(txData.canId, 1, txData.size, txData.bytes);
+		}
+		else // put message in transmit buffer for periodic sending
+		{
+		  txarr[txData.index].size = txData.size;
+		  txarr[txData.index].periodMs = txData.periodMs;
+		  txarr[txData.index].canId = txData.canId;
+		  for (j = 0; j < txData.size; j++) txarr[txData.index].bytes[j] = txData.bytes[j];
+		}
+		Serial.write(6); //ack
 	}
 
-        if (txData.periodMs == 0) // send one-shot message
-        {
-          CAN.sendMsgBuf(txData.canId, 1, txData.size, txData.bytes);
-        }
-        else // put message in transmit buffer for periodic sending
-        {
-          txarr[txData.index].size = txData.size;
-          txarr[txData.index].periodMs = txData.periodMs;
-          txarr[txData.index].canId = txData.canId;
-          for (j = 0; j < txData.size; j++) txarr[txData.index].bytes[j] = txData.bytes[j];
-        }
 
         keepalive = 255;
 
@@ -317,6 +323,10 @@ void loop()
 #endif
 
         break;
+
+	case '.': // test the watchdog
+		while(true);
+		break;
 
 	case '?': // respond with name
 		Serial.println("CANBRIDGE");
