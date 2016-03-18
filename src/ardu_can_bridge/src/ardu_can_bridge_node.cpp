@@ -240,16 +240,16 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 			serialread(fd, &tmp, 1, 10000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
 			//std::cout << "loop " << bytes_avail<< std::endl;
-		} while(bytes_avail > 0  && tmp!='b' && tmp!='n');
+		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
 
-		if(tmp != 'b') {
-			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
-			trycnt++;
-		} else {
+		if(tmp == 6) {
 			std::cout << "arduino tx received correct" << std::endl;
 			trycnt = 999;
+		} else {
+			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
+			trycnt++;
 		}
-	} while(tmp != 'b' && trycnt < 100);
+	} while(tmp != 6 && trycnt < 100);
 
 }
 
