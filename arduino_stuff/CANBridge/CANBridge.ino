@@ -3,7 +3,7 @@
 #include "mcp_can.h"
 #include "crc8_table.h"
 
-#define TXBUFFERSIZE 50
+#define TXBUFFERSIZE 10
 
 INT8U registers[] = { //list of mcp2515 registers for debugging
 MCP_RXF0SIDH,
@@ -268,7 +268,11 @@ void loop()
         //if (txData.size > 8) break; // size greater than 8 is an error
         if (txData.checksum != 42) //placeholder checksum check
 	{
-		Serial.write('n');
+		while(Serial.available()>0) Serial.read();
+		//Serial.write('n');
+		//Serial.print("\nchecksum ");
+		//Serial.print(txData.checksum);
+		//Serial.println("\n");
 		break;
 	}
 	else
