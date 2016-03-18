@@ -165,11 +165,11 @@ void flushSerial(int fd) {
 	}
 }
 
-struct TXData {
-	unsigned char size = 0;
-	unsigned char index = 0;
-	long periodMs = -1;
-	unsigned long arbID;
+struct __attribute__((__packed__))TXData {
+	uint8_t size;
+	uint8_t index;
+	long periodMs:32;
+	unsigned long arbID:32;
 	unsigned char bytes[8];
 	unsigned char checksum = 42;
 };
@@ -205,20 +205,34 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 	char tmp;
 	int trycnt = 0;
 	do {
+		//write(fd, &txdata.data.size, 19);
 		write(fd, &txdata.data.size, 1);
 		write(fd, &txdata.index, 1);
 		write(fd, &txdata.periodMs, 4);
 		write(fd, &txdata.data.arbID, 4); 
 		write(fd, &txdata.data.bytes[0], 8);
+		
+		uint8_t crc = 0;
+		//crc = crc_update(crc, &txdata.data.size, 18);
+		//std::cout << "cont crc " << crc << std::endl;
+		crc = 0;
+		crc = crc_update(crc, &txdata.data.size, 1);
+		crc = crc_update(crc, &txdata.index, 1);
+		crc = crc_update(crc, &txdata.periodMs, 4);
+		crc = crc_update(crc, &txdata.data.arbID, 4);
+		crc = crc_update(crc, &txdata.data.bytes[0], 8);
+		//std::cout << "sing crc " << crc << std::endl;
+
+		txdata.checksum = crc;
 		write(fd, &txdata.checksum, 1);
 
-			//ros::Duration(0.1).sleep();
+		//	ros::Duration(0.01).sleep();
+		flushSerial(fd);
 		int outputbytes;
 		do {
 			ioctl(fd, TIOCOUTQ, &outputbytes);
 			//std::cout << "outputbytes " << outputbytes << std::endl;
 		} while(outputbytes > 0);
-		//flushSerial(fd);
 
 
 		int bytes_avail;
@@ -226,20 +240,20 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 			serialread(fd, &tmp, 1, 10000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
 			//std::cout << "loop " << bytes_avail<< std::endl;
-		} while(bytes_avail > 0  && tmp!='b' && tmp!='n');
+		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
 
-		if(tmp != 'b') {
-			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
-			trycnt++;
-		} else {
+		if(tmp == 6) {
 			std::cout << "arduino tx received correct" << std::endl;
 			trycnt = 999;
+		} else {
+			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
+			trycnt++;
 		}
-	} while(tmp != 'b' && trycnt < 100);
+	} while(tmp != 6 && trycnt < 100);
 
 }
 
-struct RXData {
+struct __attribute__((__packed__))RXData { // all bits of this struct need to be continuous with no padding
 	//unsigned char size;
 	uint8_t size;
 	//unsigned char packetcount;
