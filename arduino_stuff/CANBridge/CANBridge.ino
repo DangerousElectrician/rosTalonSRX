@@ -68,7 +68,7 @@ MCP_CAN CAN(SPI_CS_PIN);                                    // Set CS pin
 unsigned char stmp0[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(1000000);
   pinMode(LED, OUTPUT);
 
 START_INIT:

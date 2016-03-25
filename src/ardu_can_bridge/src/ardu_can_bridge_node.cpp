@@ -16,7 +16,8 @@
 #include <fcntl.h>   /* File control definitions */
 #include <errno.h>   /* Error number definitions */
 #include <asm/termios.h> /* POSIX terminal control definitions */
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
+#include <stropts.h> // there's an ioctl function in here without the #includes  sys/ioctl.h has
 
 #define BAUD B115200
 #define PORT "/dev/ttyACM0"
@@ -56,12 +57,17 @@ int open_port(std::string dev) {
 	}
 	else fcntl(fd, F_SETFL, 0);
 
-	struct termios options;
+	struct termios2 options;
 
-	tcgetattr(fd, &options); //Get the current options for the port...
+	ioctl(fd, TCGETS2, &options);
+	//tcgetattr(fd, &options); //Get the current options for the port...
 
-	cfsetispeed(&options, BAUD); //Set the baud rates
-	cfsetospeed(&options, BAUD);
+	//cfsetispeed(&options, BAUD); //Set the baud rates
+	//cfsetospeed(&options, BAUD);
+	options.c_cflag &= ~CBAUD;
+	options.c_cflag |= BOTHER;
+	options.c_ispeed = 1000000;
+	options.c_ospeed = 1000000;
 
 	//options.c_cflag |= (CLOCAL | CREAD); //Enable the receiver and set local mode...
 	//options.c_iflag &= ~(IXON | IXOFF | IXANY); //disable software flow control
@@ -89,7 +95,8 @@ int open_port(std::string dev) {
 	options.c_cc[VMIN] = 100;
 	options.c_cc[VTIME] = 2;
 
-	tcsetattr(fd, TCSANOW, &options); //Set the new options for the port...
+	//tcsetattr(fd, TCSANOW, &options); //Set the new options for the port...
+	ioctl(fd, TCSETS2, &options);
 
 	return (fd);
 }
