@@ -15,7 +15,7 @@
 #include <unistd.h>  /* UNIX standard function definitions */
 #include <fcntl.h>   /* File control definitions */
 #include <errno.h>   /* Error number definitions */
-#include <termios.h> /* POSIX terminal control definitions */
+#include <asm/termios.h> /* POSIX terminal control definitions */
 #include <sys/ioctl.h>
 
 #define BAUD B115200
@@ -237,7 +237,7 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 
 		int bytes_avail;
 		do {
-			serialread(fd, &tmp, 1, 10000);
+			serialread(fd, &tmp, 1, 1000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
 			//std::cout << "loop " << bytes_avail<< std::endl;
 		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
@@ -307,11 +307,11 @@ int main(int argc, char **argv) {
 		if(serialread(fd, &rxData.size, 15, 800) != -1) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				//std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				//for(int j = 0; j < rxData.size; j++) {
-				//	std::cout << unsigned(rxData.bytes[j]) << " ";
-				//}
-				//std::cout << std::endl << std::flush;
+				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+				for(int j = 0; j < rxData.size; j++) {
+					std::cout << unsigned(rxData.bytes[j]) << " ";
+				}
+				std::cout << std::endl << std::flush;
 
 				can_talon_srx::CANData data;
 				data.arbID = rxData.arbID;
