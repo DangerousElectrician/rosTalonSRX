@@ -8,7 +8,6 @@ def joyCallback(joy):
 	msg = Set()
 	msg.set = joy.axes[1]
 	pub.publish(msg)
-	rospy.sleep(0.01)
 
 
 def can_talon_srx_test():

@@ -235,28 +235,28 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 
 		//	ros::Duration(0.01).sleep();
 		flushSerial(fd);
-		int outputbytes;
-		do {
-			ioctl(fd, TIOCOUTQ, &outputbytes);
-			//std::cout << "outputbytes " << outputbytes << std::endl;
-		} while(outputbytes > 0);
+		//int outputbytes;
+		//do {
+		//	ioctl(fd, TIOCOUTQ, &outputbytes);
+		//	//std::cout << "outputbytes " << outputbytes << std::endl;
+		//} while(outputbytes > 0);
 
 
 		int bytes_avail;
 		do {
-			serialread(fd, &tmp, 1, 1000);
+			serialread(fd, &tmp, 1, 50000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
 			//std::cout << "loop " << bytes_avail<< std::endl;
 		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
 
 		if(tmp == 6) {
-			std::cout << "arduino tx received correct" << std::endl;
+			//std::cout << "arduino tx received correct" << std::endl;
 			trycnt = 999;
 		} else {
 			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
 			trycnt++;
 		}
-	} while(tmp != 6 && trycnt < 100);
+	} while(tmp != 6 && trycnt < 5);
 
 }
 
@@ -309,16 +309,19 @@ int main(int argc, char **argv) {
 		RXData rxData;
 
 		if(datagood) write(fd, "d", 1);
-		else write(fd, "r", 1);
+		else {
+			write(fd, "r", 1);
+			std::cout << "retransmit req" << std::endl;
+		}
 
-		if(serialread(fd, &rxData.size, 15, 800) != -1) {
+		if(serialread(fd, &rxData.size, 15, 10000) != -1) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				for(int j = 0; j < rxData.size; j++) {
-					std::cout << unsigned(rxData.bytes[j]) << " ";
-				}
-				std::cout << std::endl << std::flush;
+				//std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+				//for(int j = 0; j < rxData.size; j++) {
+				//	std::cout << unsigned(rxData.bytes[j]) << " ";
+				//}
+				//std::cout << std::endl << std::flush;
 
 				can_talon_srx::CANData data;
 				data.arbID = rxData.arbID;
@@ -345,6 +348,7 @@ int main(int argc, char **argv) {
 					int tmppacketcount = rxData.packetcount - prevPacketCount;
 					if(tmppacketcount > 0) {
 						missedPackets += (unsigned char)(tmppacketcount - 1);
+						std::cout << "missed " << tmppacketcount-1 << " packets" << std::endl;
 					}
 					//std::cout<< "prevPacketCount: " << unsigned(prevPacketCount) << std::endl;
 					//std::cout << "missed: " << unsigned((unsigned char)(rxData.packetcount - prevPacketCount -1 )) << std::endl;
