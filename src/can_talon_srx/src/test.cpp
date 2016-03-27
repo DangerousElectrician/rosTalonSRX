@@ -5,8 +5,6 @@
 #include "FRC_NetworkCommunication/CANSessionMux.h"
 #include <memory>
 
-#include "can_talon_srx/CANSend.h"
-#include "can_talon_srx/CANRecv.h"
 #include "can_talon_srx/GetParameter.h"
 
 #include "can_talon_srx_msgs/Set.h"

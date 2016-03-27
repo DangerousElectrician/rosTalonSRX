@@ -51,7 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
-add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -61,8 +60,8 @@ add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 # )
 add_service_files(
 	FILES 
-	CANRecv.srv
 	GetParameter.srv
+	ConfigSetParameter.srv
 )
 
 ## Generate actions in the 'action' folder

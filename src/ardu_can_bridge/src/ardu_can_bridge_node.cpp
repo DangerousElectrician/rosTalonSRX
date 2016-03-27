@@ -1,7 +1,5 @@
 #include "ros/ros.h"
-#include "can_talon_srx/CANRecv.h"
-#include "can_talon_srx/CANSend.h"
-#include "can_talon_srx/CANData.h"
+#include "ardu_can_bridge/CANRecv.h"
 #include "ardu_can_bridge_msgs/CANSend.h"
 #include "ardu_can_bridge_msgs/CANData.h"
 #include "crc8_table.h"
@@ -23,10 +21,10 @@
 #define PORT "/dev/ttyACM0"
 
 int fd = -1;
-std::map<uint32_t, can_talon_srx::CANData> receivedCAN;
+std::map<uint32_t, ardu_can_bridge_msgs::CANData> receivedCAN;
 
 struct txCANData {
-	can_talon_srx::CANData data;
+	ardu_can_bridge_msgs::CANData data;
 	uint8_t checksum = 42;
 	uint8_t index = 0;
 	int32_t periodMs = -1;
@@ -109,7 +107,7 @@ ssize_t serialread(int fd, void *buf, size_t count, long int timeoutus) {
         FD_ZERO(&except_fds);
         FD_SET(fd, &read_fds);
 
-        // Set timeout to 1.0 seconds
+        // Set timeout
         struct timeval timeout;
         timeout.tv_sec = 0;
         timeout.tv_usec = timeoutus;
@@ -127,14 +125,14 @@ ssize_t serialread(int fd, void *buf, size_t count, long int timeoutus) {
         }
 }
 
-bool recvCAN(can_talon_srx::CANRecv::Request &req, can_talon_srx::CANRecv::Response &res) {
+bool recvCAN(ardu_can_bridge::CANRecv::Request &req, ardu_can_bridge::CANRecv::Response &res) {
 	//ROS_INFO("request arbID: %ld", (long int)req.arbID);
 
-	std::map<uint32_t, can_talon_srx::CANData>::iterator i = receivedCAN.find(req.arbID);
+	std::map<uint32_t, ardu_can_bridge_msgs::CANData>::iterator i = receivedCAN.find(req.arbID);
 	if(i == receivedCAN.end()) {
 		//no message with requested arbID
 
-		can_talon_srx::CANData data;
+		ardu_can_bridge_msgs::CANData data;
 		res.status = 1; //status is 1 if there is no CAN frame with requested arbID
 
 	} else {
@@ -181,7 +179,8 @@ struct __attribute__((__packed__))TXData {
 	unsigned char checksum = 42;
 };
 
-void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
+void CANSendCallback(const ardu_can_bridge_msgs::CANSend::ConstPtr& msg) {
+	write(fd, "w", 1);
 	txCANData txdata;
 	txdata.data = msg->data;
 	txdata.periodMs = msg->periodMs;
@@ -244,19 +243,20 @@ void CANSendCallback(const can_talon_srx::CANSend::ConstPtr& msg) {
 
 		int bytes_avail;
 		do {
-			serialread(fd, &tmp, 1, 50000);
+			serialread(fd, &tmp, 1, 5000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
 			//std::cout << "loop " << bytes_avail<< std::endl;
 		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
 
 		if(tmp == 6) {
-			//std::cout << "arduino tx received correct" << std::endl;
+			std::cout << "arduino tx received correct" << std::endl;
 			trycnt = 999;
 		} else {
 			std::cout << "arduino tx receive error " << unsigned(tmp) <<std::endl;
 			trycnt++;
 		}
 	} while(tmp != 6 && trycnt < 5);
+	//write(fd, "q", 1);
 
 }
 
@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber sub = n.subscribe("CANSend", 100, CANSendCallback);
 
-	ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
+	//ros::ServiceServer service = n.advertiseService("CANRecv", recvCAN);
 	ros::Publisher CANRecv_pub = n.advertise<ardu_can_bridge_msgs::CANData>("CANRecv", 100);
 
 	//ros::AsyncSpinner spinner(2);
@@ -305,31 +305,34 @@ int main(int argc, char **argv) {
 	int prevPacketCount = 0;
 
 	char datagood = 1;
+	//write(fd, "q", 1); //enable stream mode
 	while(ros::ok()) {
 		RXData rxData;
 
-		if(datagood) write(fd, "d", 1);
-		else {
+		if(datagood) {
+			write(fd, "d", 1);
+		} else {
 			write(fd, "r", 1);
 			std::cout << "retransmit req" << std::endl;
 		}
 
-		if(serialread(fd, &rxData.size, 15, 10000) != -1) {
+		if(serialread(fd, &rxData.size, 15, 1000) != -1) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
-				//std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
-				//for(int j = 0; j < rxData.size; j++) {
-				//	std::cout << unsigned(rxData.bytes[j]) << " ";
-				//}
-				//std::cout << std::endl << std::flush;
+				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
+				for(int j = 0; j < rxData.size; j++) {
+					std::cout << unsigned(rxData.bytes[j]) << " ";
+				}
+				std::cout << std::endl << std::flush;
 
-				can_talon_srx::CANData data;
+				ardu_can_bridge_msgs::CANData data;
 				data.arbID = rxData.arbID;
 				data.size = rxData.size;
 				data.bytes = std::vector<uint8_t> (rxData.bytes, rxData.bytes + rxData.size);
 
 				receivedCAN[data.arbID] = data;
 				if(!datagood) {
+					//write(fd, "q", 1);
 					datagood = 1;
 				}
 
@@ -363,6 +366,7 @@ int main(int argc, char **argv) {
 				std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
 				std::cout << std::endl<< std::flush;
 				datagood = 0;
+				write(fd, "w", 1);
 				//std::cout << "p1" << std::endl;
 				flushSerial(fd);
 				//std::cout << "p2" << std::endl;

@@ -5,9 +5,9 @@ project(ardu_can_bridge)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  can_talon_srx
   roscpp
   ardu_can_bridge_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -56,7 +56,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Service1.srv
 #   Service2.srv
 # )
-
+add_service_files(
+	FILES
+	CANRecv.srv
+)
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -65,10 +68,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+  ardu_can_bridge_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -102,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ardu_can_bridge
-  CATKIN_DEPENDS can_talon_srx ardu_can_bridge_msgs roscpp
+  CATKIN_DEPENDS ardu_can_bridge_msgs roscpp
 #  DEPENDS system_lib
 )
 
@@ -135,7 +139,7 @@ add_library(crc8_table src/crc8_table.c)
 # add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
 add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
 target_link_libraries(ardu_can_bridge_node crc8_table)
-add_dependencies(ardu_can_bridge_node can_talon_srx_generate_messages_cpp)
+add_dependencies(ardu_can_bridge_node ardu_can_bridge_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

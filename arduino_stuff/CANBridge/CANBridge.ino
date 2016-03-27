@@ -239,7 +239,7 @@ void loop()
 
 	case 'h':
 		Serial.println("\n");
-	    for (j = 0; j < TXBUFFERSIZE; j++)		// send all periodic messages
+	    for (j = 0; j < TXBUFFERSIZE; j++)		// print all periodic messages
 	    {
 	    	Serial.print("per ");
 	      Serial.print(txarr[j].periodMs);
