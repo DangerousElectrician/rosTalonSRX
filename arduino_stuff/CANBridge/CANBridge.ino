@@ -146,68 +146,8 @@ void loop()
 
 	wdt_reset();
 
-  if (CAN_MSGAVAIL == CAN.checkReceive())           // check if data coming
-  {						// put received CAN messages in the buffer
-    CAN.readMsgBuf(&rxData.size, rxData.bytes);
-  
-  //populate data struct
-    rxData.canId = CAN.getCanId();
-    rxData.checksum = crc_update(0, &rxData.canId, 12);
-    rxData.packetcount++;
-  //put data in buffer
-    RXDataBuffer[RXDataBufferWriteIndex].size = rxData.size;
-    RXDataBuffer[RXDataBufferWriteIndex].packetcount = rxData.packetcount;
-    RXDataBuffer[RXDataBufferWriteIndex].canId = rxData.canId;
-    for (j = 0; j < 8; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
-    RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
 
-    if (RXDataBufferWriteIndex < RXBUFFERSIZE-1) RXDataBufferWriteIndex++;
-    else RXDataBufferWriteIndex = 0;
-    
-    if (RXDataBufferWriteIndex == RXDataBufferReadIndex) {
-      if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
-      else RXDataBufferReadIndex = 0;
-    }
-    
-    RXDataBufferWriteCount++;
-    if(RXDataBytestosend <= RXBUFFERSIZE) RXDataBytestosend++;
-
-
-  }
-
-  if (keepalive) // send messages only if the host computer has talked recently
-  {
-    for (j = 0; j < TXBUFFERSIZE; j++)		// send all periodic messages
-    {
-      if (txarr[j].periodMs >= 0) // do not send messages with a -1 period
-      {
-        CAN.sendMsgBuf(txarr[j].canId, 1, txarr[j].size, txarr[j].bytes);
-        if (txarr[j].periodMs == 0) txarr[j].periodMs = -1;
-      }
-    }
-    keepalive--;
-  }
-  else
-  {
-    for (j = 0; j < TXBUFFERSIZE; j++) // set all message periods to -1 if no communications from host
-    {
-      txarr[j].periodMs = -1;
-    }
-  }
-
-  // send received CAN messages to computer if stream mode is enabled    ||  RXDataBufferReadIndex != RXDataBufferWriteIndex
-  if ( (stream || send2hostonce) && (RXDataBufferReadIndex != RXDataBufferWriteIndex) ) //if indexes are the same, there are no unread messages in buffer
-  {
-    Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
-    prevRXDataBufferReadIndex = RXDataBufferReadIndex;
-    if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
-    else RXDataBufferReadIndex = 0;
-    send2hostonce--;
-    RXDataBufferReadCount++;
-    RXDataBytestosend--;
-  }
-
-  if (Serial.available())
+if (Serial.available())
   {
     command = Serial.read();
     switch (command)
@@ -348,4 +288,68 @@ void loop()
 		break;
     }
   }
+  
+
+  if (CAN_MSGAVAIL == CAN.checkReceive())           // check if data coming
+  {						// put received CAN messages in the buffer
+    CAN.readMsgBuf(&rxData.size, rxData.bytes);
+  
+  //populate data struct
+    rxData.canId = CAN.getCanId();
+    rxData.checksum = crc_update(0, &rxData.canId, 12);
+    rxData.packetcount++;
+  //put data in buffer
+    RXDataBuffer[RXDataBufferWriteIndex].size = rxData.size;
+    RXDataBuffer[RXDataBufferWriteIndex].packetcount = rxData.packetcount;
+    RXDataBuffer[RXDataBufferWriteIndex].canId = rxData.canId;
+    for (j = 0; j < 8; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
+    RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
+
+    if (RXDataBufferWriteIndex < RXBUFFERSIZE-1) RXDataBufferWriteIndex++;
+    else RXDataBufferWriteIndex = 0;
+    
+    if (RXDataBufferWriteIndex == RXDataBufferReadIndex) {
+      if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
+      else RXDataBufferReadIndex = 0;
+    }
+    
+    RXDataBufferWriteCount++;
+    if(RXDataBytestosend <= RXBUFFERSIZE) RXDataBytestosend++;
+
+
+  }
+
+  if (keepalive) // send messages only if the host computer has talked recently
+  {
+    for (j = 0; j < TXBUFFERSIZE; j++)		// send all periodic messages
+    {
+      if (txarr[j].periodMs >= 0) // do not send messages with a -1 period
+      {
+        CAN.sendMsgBuf(txarr[j].canId, 1, txarr[j].size, txarr[j].bytes);
+        if (txarr[j].periodMs == 0) txarr[j].periodMs = -1;
+      }
+    }
+    keepalive--;
+  }
+  else
+  {
+    for (j = 0; j < TXBUFFERSIZE; j++) // set all message periods to -1 if no communications from host
+    {
+      txarr[j].periodMs = -1;
+    }
+  }
+
+  // send received CAN messages to computer if stream mode is enabled    ||  RXDataBufferReadIndex != RXDataBufferWriteIndex
+  if ( (stream || send2hostonce) && (RXDataBufferReadIndex != RXDataBufferWriteIndex) ) //if indexes are the same, there are no unread messages in buffer
+  {
+    Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
+    prevRXDataBufferReadIndex = RXDataBufferReadIndex;
+    if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
+    else RXDataBufferReadIndex = 0;
+    send2hostonce--;
+    RXDataBufferReadCount++;
+    RXDataBytestosend--;
+  }
+
+  
 }
