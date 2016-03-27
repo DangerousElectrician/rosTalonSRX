@@ -307,6 +307,8 @@ int main(int argc, char **argv) {
 	int goodPackets = 0;
 	int prevPacketCount = 0;
 
+	int packetcounttally[255] = {};
+
 	char datagood = 1;
 	char repeatread = 0;
 	//write(fd, "q", 1); //enable stream mode
@@ -320,7 +322,9 @@ int main(int argc, char **argv) {
 			} else {
 				write(fd, "r", 1);
 				std::cout << "retransmit req" << std::endl;
-				repeatread = 1;
+				//repeatread = 1;
+				write(fd, "d", 1);
+				repeatread = 2;
 			}
 		} else {
 			int bytes_avail;
@@ -364,6 +368,7 @@ int main(int argc, char **argv) {
 					if(tmppacketcount > 0) {
 						missedPackets += (unsigned char)(tmppacketcount - 1);
 						std::cout << "missed " << tmppacketcount-1 << " packets" << std::endl;
+						datagood = 0;
 					}
 					//std::cout<< "prevPacketCount: " << unsigned(prevPacketCount) << std::endl;
 					//std::cout << "missed: " << unsigned((unsigned char)(rxData.packetcount - prevPacketCount -1 )) << std::endl;

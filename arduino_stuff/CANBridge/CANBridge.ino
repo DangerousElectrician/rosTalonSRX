@@ -158,13 +158,15 @@ if (Serial.available())
         break;
 
       case 'r': //resend message in case there is an error
-        if (RXDataBufferReadIndex < 1)
+        if (RXDataBufferReadIndex < 5)
         {
-          Serial.write((unsigned char*) &RXDataBuffer[RXBUFFERSIZE-1 + RXDataBufferReadIndex], 15);
+          RXDataBufferReadIndex = RXBUFFERSIZE-5 + RXDataBufferReadIndex;
+          //Serial.write((unsigned char*) &RXDataBuffer[RXBUFFERSIZE-1 + RXDataBufferReadIndex], 15);
         }
         else
         {
-          Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex - 1], 15);
+          //Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex - 1], 15);
+          RXDataBufferReadIndex -= 5;
         }
         break;
 
