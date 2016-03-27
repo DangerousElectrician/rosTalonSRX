@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include "ros/callback_queue.h"
 #include "ardu_can_bridge/CANRecv.h"
 #include "ardu_can_bridge_msgs/CANSend.h"
 #include "ardu_can_bridge_msgs/CANData.h"
@@ -19,6 +20,8 @@
 
 #define BAUD B115200
 #define PORT "/dev/ttyACM0"
+
+ros::CallbackQueue callbackQueue;
 
 int fd = -1;
 std::map<uint32_t, ardu_can_bridge_msgs::CANData> receivedCAN;
@@ -180,7 +183,7 @@ struct __attribute__((__packed__))TXData {
 };
 
 void CANSendCallback(const ardu_can_bridge_msgs::CANSend::ConstPtr& msg) {
-	write(fd, "w", 1);
+	//write(fd, "w", 1);
 	txCANData txdata;
 	txdata.data = msg->data;
 	txdata.periodMs = msg->periodMs;
@@ -233,7 +236,7 @@ void CANSendCallback(const ardu_can_bridge_msgs::CANSend::ConstPtr& msg) {
 		write(fd, &txdata.checksum, 1);
 
 		//	ros::Duration(0.01).sleep();
-		flushSerial(fd);
+		//flushSerial(fd);
 		//int outputbytes;
 		//do {
 		//	ioctl(fd, TIOCOUTQ, &outputbytes);
@@ -243,10 +246,10 @@ void CANSendCallback(const ardu_can_bridge_msgs::CANSend::ConstPtr& msg) {
 
 		int bytes_avail;
 		do {
-			serialread(fd, &tmp, 1, 5000);
+			serialread(fd, &tmp, 1, 10000);
 			ioctl(fd, TIOCINQ, &bytes_avail);
-			//std::cout << "loop " << bytes_avail<< std::endl;
-		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21);
+			std::cout << "loop " << bytes_avail<< std::endl;
+		} while(bytes_avail > 0  &&  tmp!=6 && tmp!=21); //
 
 		if(tmp == 6) {
 			std::cout << "arduino tx received correct" << std::endl;
@@ -305,18 +308,27 @@ int main(int argc, char **argv) {
 	int prevPacketCount = 0;
 
 	char datagood = 1;
+	char repeatread = 0;
 	//write(fd, "q", 1); //enable stream mode
 	while(ros::ok()) {
 		RXData rxData;
 
-		if(datagood) {
-			write(fd, "d", 1);
+		if(ros::getGlobalCallbackQueue()->isEmpty()) {
+			if(datagood) {
+				write(fd, "d", 1);
+				repeatread = 2;
+			} else {
+				write(fd, "r", 1);
+				std::cout << "retransmit req" << std::endl;
+				repeatread = 1;
+			}
 		} else {
-			write(fd, "r", 1);
-			std::cout << "retransmit req" << std::endl;
+			int bytes_avail;
+			ioctl(fd, TIOCINQ, &bytes_avail);
+			if(bytes_avail) repeatread = 1;
 		}
 
-		if(serialread(fd, &rxData.size, 15, 1000) != -1) {
+		if((repeatread)&& serialread(fd, &rxData.size, 15, 100000) != -1 ) {
 			if(rxData.size <= 8 &&rxData.checksum == crc_update(0, &rxData.packetcount+1, 12) ) { //can't get address of bitfield
 
 				std::cout << "size:" << unsigned(rxData.size) << " pcktcnt:" << unsigned(rxData.packetcount) << "\tchksum:" << unsigned(rxData.checksum) << "\tarbID:"<< unsigned(rxData.arbID) << "\tbytes:";
@@ -366,14 +378,18 @@ int main(int argc, char **argv) {
 				std::cout << "cksm err " << unsigned(crc_update(0, &rxData.packetcount+1, 12));// << unsigned(rxData.size) << std::endl << std::flush;
 				std::cout << std::endl<< std::flush;
 				datagood = 0;
-				write(fd, "w", 1);
+				//write(fd, "w", 1);
 				//std::cout << "p1" << std::endl;
 				flushSerial(fd);
 				//std::cout << "p2" << std::endl;
 				//std::cout << "p3" << std::endl;
 			}
+			repeatread--;
+		} else {
+			std::cout << "timeout " << unsigned(repeatread) << std::endl;
+			ros::getGlobalCallbackQueue()->callAvailable();
 		}
-		ros::spinOnce();
+		//ros::spinOnce();
 	}
 	write(fd, "w", 1);
 
