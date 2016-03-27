@@ -121,18 +121,25 @@ TXCANData txarr[TXBUFFERSIZE];
 RXData rxData;
 TXData txData;
 
-RXData RXDataBuffer[10];
-unsigned char RXDataBufferWriteIndex = 0;
-unsigned char RXDataBufferReadIndex = 0;
+#define RXBUFFERSIZE 20
+
+RXData RXDataBuffer[RXBUFFERSIZE];
+char RXDataBufferWriteIndex = 0;
+char RXDataBufferReadIndex = 0;
 unsigned char prevRXDataBufferReadIndex = 0;
+unsigned char RXDataBufferReadCount = 0;
+unsigned char RXDataBufferWriteCount = 0;
+unsigned char RXDataBytestosend = 0;
 
 unsigned char keepalive = 0;
 unsigned char sendmessages = 0;
 unsigned char command = 0;
 
 unsigned char stream = 0;
+unsigned char send2hostonce=0;
 
 int j = 0;
+
 
 void loop()
 {
@@ -142,19 +149,28 @@ void loop()
   if (CAN_MSGAVAIL == CAN.checkReceive())           // check if data coming
   {						// put received CAN messages in the buffer
     CAN.readMsgBuf(&rxData.size, rxData.bytes);
-
+  
+  //populate data struct
     rxData.canId = CAN.getCanId();
     rxData.checksum = crc_update(0, &rxData.canId, 12);
     rxData.packetcount++;
-
+  //put data in buffer
     RXDataBuffer[RXDataBufferWriteIndex].size = rxData.size;
     RXDataBuffer[RXDataBufferWriteIndex].packetcount = rxData.packetcount;
     RXDataBuffer[RXDataBufferWriteIndex].canId = rxData.canId;
     for (j = 0; j < 8; j++) RXDataBuffer[RXDataBufferWriteIndex].bytes[j] = rxData.bytes[j];
     RXDataBuffer[RXDataBufferWriteIndex].checksum = rxData.checksum;
 
-    if (RXDataBufferWriteIndex < 9) RXDataBufferWriteIndex++;
+    if (RXDataBufferWriteIndex < RXBUFFERSIZE-1) RXDataBufferWriteIndex++;
     else RXDataBufferWriteIndex = 0;
+    
+    if (RXDataBufferWriteIndex == RXDataBufferReadIndex) {
+      if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
+      else RXDataBufferReadIndex = 0;
+    }
+    
+    RXDataBufferWriteCount++;
+    if(RXDataBytestosend <= RXBUFFERSIZE) RXDataBytestosend++;
 
 
   }
@@ -179,13 +195,16 @@ void loop()
     }
   }
 
-  // send received CAN messages to computer if stream mode is enabled
-  if (stream && RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
+  // send received CAN messages to computer if stream mode is enabled    ||  RXDataBufferReadIndex != RXDataBufferWriteIndex
+  if ( (stream || send2hostonce) && (RXDataBufferReadIndex != RXDataBufferWriteIndex) ) //if indexes are the same, there are no unread messages in buffer
   {
     Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
     prevRXDataBufferReadIndex = RXDataBufferReadIndex;
-    if (RXDataBufferReadIndex < 9) RXDataBufferReadIndex++;
+    if (RXDataBufferReadIndex < RXBUFFERSIZE-1) RXDataBufferReadIndex++;
     else RXDataBufferReadIndex = 0;
+    send2hostonce--;
+    RXDataBufferReadCount++;
+    RXDataBytestosend--;
   }
 
   if (Serial.available())
@@ -194,20 +213,14 @@ void loop()
     switch (command)
     {
       case 'd': // send received CAN messages to host
-        if (RXDataBufferReadIndex != RXDataBufferWriteIndex) //if indexes are the same, there are no unread messages in buffer
-        {
-          Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
-          prevRXDataBufferReadIndex = RXDataBufferReadIndex;
-          if (RXDataBufferReadIndex < 9) RXDataBufferReadIndex++;
-          else RXDataBufferReadIndex = 0;
-        }
+        send2hostonce = 2;
         keepalive = 255;
         break;
 
       case 'r': //resend message in case there is an error
         if (RXDataBufferReadIndex < 1)
         {
-          Serial.write((unsigned char*) &RXDataBuffer[9 + RXDataBufferReadIndex], 15);
+          Serial.write((unsigned char*) &RXDataBuffer[RXBUFFERSIZE-1 + RXDataBufferReadIndex], 15);
         }
         else
         {
@@ -267,6 +280,8 @@ void loop()
       case 6:
       case 7:
       case 8: // 1:size 1:index 4:period 4:arbID 8:data 1:checksum  19 total
+      send2hostonce = 0;
+      
         txData.size = command;
         while (Serial.available() < 18);
         Serial.readBytes((char*)&txData.index, 18);
