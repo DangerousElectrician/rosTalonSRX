@@ -138,6 +138,8 @@ unsigned char command = 0;
 unsigned char stream = 0;
 unsigned char send2hostonce=0;
 
+unsigned long periodicMessageLastMillis = 0;
+
 int j = 0;
 
 
@@ -342,7 +344,7 @@ if (Serial.available())
   }
 
   // send received CAN messages to computer if stream mode is enabled    ||  RXDataBufferReadIndex != RXDataBufferWriteIndex
-  if ( (stream || send2hostonce) && (RXDataBufferReadIndex != RXDataBufferWriteIndex) ) //if indexes are the same, there are no unread messages in buffer
+  if ( (stream || send2hostonce) && (RXDataBufferReadIndex != RXDataBufferWriteIndex) && millis()-periodicMessageLastMillis >= 10) //if indexes are the same, there are no unread messages in buffer
   {
     Serial.write((unsigned char*) &RXDataBuffer[RXDataBufferReadIndex], 15);
     prevRXDataBufferReadIndex = RXDataBufferReadIndex;
