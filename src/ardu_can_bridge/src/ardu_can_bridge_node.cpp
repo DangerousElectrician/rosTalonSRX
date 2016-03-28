@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <iterator>
+#include <bitset>
 
 //serial port stuff
 #include <stdio.h>   /* Standard input/output definitions */
@@ -307,7 +308,16 @@ int main(int argc, char **argv) {
 	int goodPackets = 0;
 	int prevPacketCount = 0;
 
-	int packetcounttally[255] = {};
+	int packetcounttally[256] = {};
+
+
+	std::bitset<256> packettally;
+	int cycles = 0;
+	int cycles255 = 0;
+	int cycles255cnt = 0;
+
+
+
 
 	char datagood = 1;
 	char repeatread = 0;
@@ -375,6 +385,18 @@ int main(int argc, char **argv) {
 				}
 				prevPacketCount = rxData.packetcount;
 				goodPackets++;
+				packetcounttally[rxData.packetcount]++;
+
+				packettally.set(rxData.packetcount, true);
+				if(packettally.all()) {
+					packettally.reset();
+					cycles++;
+				}
+				cycles255cnt++;
+				if(rxData.packetcount == 255 && cycles255cnt >= 256) {
+					cycles255++;
+					cycles255cnt = 0;
+				}
 
 			} else {
 				for(int j = 0; j < 15; j++) {
@@ -398,10 +420,23 @@ int main(int argc, char **argv) {
 	}
 	write(fd, "w", 1);
 
+	std::cout << std::endl;
+
+	cycles255++;
+
+	missedPackets = 0;
+	for(int i = 0; i < 256; i++) {
+		std::cout << i << "\t" << packetcounttally[i] << std::endl;
+		if(packetcounttally[i] < cycles255) missedPackets++;
+		
+	}
+
 	std::cout << std::endl << "goodPackets:\t" << goodPackets << std::endl;
 	std::cout << "missedPackets:\t" << missedPackets << std::endl << std::endl;
 	std::cout << "totalPackets:\t" << goodPackets+missedPackets << std::endl;
 	std::cout << "percentGood:\t" << float(goodPackets)/(goodPackets+missedPackets) << std::endl;
+	std::cout << "cycles:\t" << cycles << std::endl;
+	std::cout << "cycles255:\t" << cycles255 << std::endl;
 
 	return 0;
 }
