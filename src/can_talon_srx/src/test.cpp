@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	
 	ros::ServiceServer getParameter_srv = n.advertiseService("getParameter", getParameter);
 
-	ros::Subscriber set_sub = n.subscribe("set", 10, setCallback);
+	ros::Subscriber set_sub = n.subscribe("set", 1, setCallback);
 	ros::Subscriber ConfigSetParameter_sub = n.subscribe("configSetParameter", 10, configSetParameterCallback);
 
 	ros::Subscriber setDemandCallback_sub = n.subscribe("setDemand", 10, setDemandCallback);

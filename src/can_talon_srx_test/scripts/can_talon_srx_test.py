@@ -12,7 +12,7 @@ def joyCallback(joy):
 
 def can_talon_srx_test():
 	rospy.init_node('can_talon_srx_test')
-	rospy.Subscriber("joy", Joy, joyCallback)
+	rospy.Subscriber("joy", Joy, joyCallback, queue_size=10)
 	global pub
 	pub = rospy.Publisher('set', Set, queue_size=1)
 	rospy.spin()
