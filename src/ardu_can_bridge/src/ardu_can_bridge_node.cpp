@@ -414,7 +414,7 @@ int main(int argc, char **argv) {
 			repeatread--;
 		} else {
 			std::cout << "timeout " << unsigned(repeatread) << std::endl;
-			ros::getGlobalCallbackQueue()->callOne();
+			ros::getGlobalCallbackQueue()->callAvailable();
 		}
 		//ros::spinOnce();
 	}
