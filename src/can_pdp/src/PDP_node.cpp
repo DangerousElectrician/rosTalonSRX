@@ -29,8 +29,7 @@ int main(int argc, char **argv) {
 
 	pdp = new PDP(0);
 
-	double current;
-	pdp->GetChannelCurrent(0, current);
+	ros::Rate loop_rate(20);
 
 	while(ros::ok()) {
 		can_pdp_msgs::PDP pdp_msg;
@@ -45,5 +44,7 @@ int main(int argc, char **argv) {
 		pdp->GetTotalEnergy(pdp_msg.TotalEnergy);
 
 		pdp_pub.publish(pdp_msg);
+
+		loop_rate.sleep();
 	}
 }
