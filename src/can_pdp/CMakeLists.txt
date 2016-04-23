@@ -124,13 +124,13 @@ include_directories(
 # add_library(can_pdp
 #   src/${PROJECT_NAME}/can_pdp.cpp
 # )
-add_library(CANSessionMux src/CANSessionMux.cpp )
-target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
+add_library(CANSessionMux2 src/CANSessionMux.cpp )
+target_link_libraries(CANSessionMux2 ${catkin_LIBRARIES} )
 
 add_library(PDP src/PDP.cpp)
-target_link_libraries(PDP CtreCanNode CANSessionMux)
+target_link_libraries(PDP CtreCanNode2 CANSessionMux2)
 
-add_library(CtreCanNode src/CtreCanNode.cpp)
+add_library(CtreCanNode2 src/CtreCanNode.cpp)
 
 add_executable(can_pdp_node src/PDP_node.cpp)
 target_link_libraries(can_pdp_node PDP ${catkin_LIBRARIES} )
