@@ -136,10 +136,10 @@ add_library(CANSessionMux src/CANSessionMux.cpp )
 target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
 add_dependencies(CANSessionMux can_talon_srx_generate_messages_cpp)
 
-add_library(CanTalonSRX	src/CanTalonSRX.cpp )
+add_library(CanTalonSRX src/CanTalonSRX.cpp)
 target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)
 
-add_library(CtreCanNode	src/CtreCanNode.cpp)
+add_library(CtreCanNode src/CtreCanNode.cpp)
 #target_link_libraries(CtreCanNode ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the library
