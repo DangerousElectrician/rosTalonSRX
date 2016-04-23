@@ -7,6 +7,7 @@ project(can_pdp)
 find_package(catkin REQUIRED COMPONENTS
   ardu_can_bridge_msgs
   can_pdp_msgs
+  roscpp
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,10 +110,13 @@ catkin_package(
 ## Build ##
 ###########
 
+set( CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}" )
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -120,6 +124,17 @@ include_directories(
 # add_library(can_pdp
 #   src/${PROJECT_NAME}/can_pdp.cpp
 # )
+add_library(CANSessionMux src/CANSessionMux.cpp )
+target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
+
+add_library(PDP src/PDP.cpp)
+target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)
+
+add_library(CtreCanNode src/CtreCanNode.cpp)
+
+add_executable(can_pdp_node src/PDP_node.cpp)
+target_link_libraries(can_pdp_node PDP ${catkin_LIBRARIES} )
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
