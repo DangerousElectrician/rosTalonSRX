@@ -128,7 +128,7 @@ add_library(CANSessionMux src/CANSessionMux.cpp )
 target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
 
 add_library(PDP src/PDP.cpp)
-target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)
+target_link_libraries(PDP CtreCanNode CANSessionMux)
 
 add_library(CtreCanNode src/CtreCanNode.cpp)
 
