@@ -45,11 +45,10 @@ class MCP_CAN
 *  mcp2515 driver function 
 */
    // private:
-private:
+public:
 
     void mcp2515_reset(void);                                           /* reset mcp2515                */
 
-    INT8U mcp2515_readRegister(const INT8U address);                    /* read mcp2515's register      */
     
     void mcp2515_readRegisterS(const INT8U address, 
 	                       INT8U values[], 
@@ -96,6 +95,7 @@ private:
     INT8U sendMsg();                                                /* send message                 */
 
 public:
+    INT8U mcp2515_readRegister(const INT8U address);                    /* read mcp2515's register      */
     MCP_CAN(INT8U _CS);
     INT8U begin(INT8U speedset);                                    /* init can                     */
     INT8U init_Mask(INT8U num, INT8U ext, INT32U ulData);           /* init Masks                   */

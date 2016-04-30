@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ardu_can_bridge)
+project(ardu_can_bridge_msgs)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  ardu_can_bridge_msgs
   message_generation
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -44,11 +43,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  CANData.msg
+  CANSend.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -56,10 +55,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   Service1.srv
 #   Service2.srv
 # )
-add_service_files(
-	FILES
-	CANRecv.srv
-)
+
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -68,11 +64,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
-  ardu_can_bridge_msgs
-)
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,8 +100,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ardu_can_bridge
-  CATKIN_DEPENDS ardu_can_bridge_msgs roscpp
+#  LIBRARIES ardu_can_bridge_msgs
+#  CATKIN_DEPENDS message_generation std_msgs
 #  DEPENDS system_lib
 )
 
@@ -114,38 +109,31 @@ catkin_package(
 ## Build ##
 ###########
 
-set( CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}" )
-
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(ardu_can_bridge
-#   src/${PROJECT_NAME}/ardu_can_bridge.cpp
+# add_library(ardu_can_bridge_msgs
+#   src/${PROJECT_NAME}/ardu_can_bridge_msgs.cpp
 # )
-add_library(crc8_table src/crc8_table.c)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(ardu_can_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(ardu_can_bridge_msgs ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
-add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
-target_link_libraries(ardu_can_bridge_node crc8_table)
-add_dependencies(ardu_can_bridge_node ardu_can_bridge_generate_messages_cpp)
+# add_executable(ardu_can_bridge_msgs_node src/ardu_can_bridge_msgs_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(ardu_can_bridge_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(ardu_can_bridge_msgs_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(ardu_can_bridge_node
-   ${catkin_LIBRARIES}
- )
+# target_link_libraries(ardu_can_bridge_msgs_node
+#   ${catkin_LIBRARIES}
+# )

@@ -51,7 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
-add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -59,7 +58,11 @@ add_message_files(DIRECTORY msg FILES CANSend.msg CANData.msg)
 #   Service1.srv
 #   Service2.srv
 # )
-add_service_files(FILES CANRecv.srv)
+add_service_files(
+	FILES 
+	GetParameter.srv
+	ConfigSetParameter.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -69,11 +72,11 @@ add_service_files(FILES CANRecv.srv)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
-generate_messages(DEPENDENCIES std_msgs)
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
+#generate_messages(DEPENDENCIES std_msgs)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -133,10 +136,10 @@ add_library(CANSessionMux src/CANSessionMux.cpp )
 target_link_libraries(CANSessionMux ${catkin_LIBRARIES} )
 add_dependencies(CANSessionMux can_talon_srx_generate_messages_cpp)
 
-add_library(CanTalonSRX	src/CanTalonSRX.cpp )
+add_library(CanTalonSRX src/CanTalonSRX.cpp)
 target_link_libraries(CanTalonSRX CtreCanNode CANSessionMux)
 
-add_library(CtreCanNode	src/CtreCanNode.cpp)
+add_library(CtreCanNode src/CtreCanNode.cpp)
 #target_link_libraries(CtreCanNode ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the library

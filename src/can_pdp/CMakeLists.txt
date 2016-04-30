@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ardu_can_bridge)
+project(can_pdp)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
   ardu_can_bridge_msgs
-  message_generation
+  can_pdp_msgs
+  roscpp
 )
 
 ## System dependencies are found with CMake's conventions
@@ -56,10 +56,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   Service1.srv
 #   Service2.srv
 # )
-add_service_files(
-	FILES
-	CANRecv.srv
-)
+
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -68,11 +65,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
-  ardu_can_bridge_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   ardu_can_bridge_msgs#   can_pdp_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,8 +101,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ardu_can_bridge
-  CATKIN_DEPENDS ardu_can_bridge_msgs roscpp
+#  LIBRARIES can_pdp
+#  CATKIN_DEPENDS ardu_can_bridge_msgs can_pdp_msgs
 #  DEPENDS system_lib
 )
 
@@ -125,27 +121,82 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(ardu_can_bridge
-#   src/${PROJECT_NAME}/ardu_can_bridge.cpp
+# add_library(can_pdp
+#   src/${PROJECT_NAME}/can_pdp.cpp
 # )
-add_library(crc8_table src/crc8_table.c)
+add_library(CANSessionMux2 src/CANSessionMux.cpp )
+target_link_libraries(CANSessionMux2 ${catkin_LIBRARIES} )
+
+add_library(PDP src/PDP.cpp)
+target_link_libraries(PDP CtreCanNode2 CANSessionMux2)
+
+add_library(CtreCanNode2 src/CtreCanNode.cpp)
+
+add_executable(can_pdp_node src/PDP_node.cpp)
+target_link_libraries(can_pdp_node PDP ${catkin_LIBRARIES} )
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(ardu_can_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(can_pdp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
-add_executable(ardu_can_bridge_node src/ardu_can_bridge_node.cpp)
-target_link_libraries(ardu_can_bridge_node crc8_table)
-add_dependencies(ardu_can_bridge_node ardu_can_bridge_generate_messages_cpp)
+# add_executable(can_pdp_node src/can_pdp_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(ardu_can_bridge_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(can_pdp_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(ardu_can_bridge_node
-   ${catkin_LIBRARIES}
- )
+# target_link_libraries(can_pdp_node
+#   ${catkin_LIBRARIES}
+# )
+
+#############
+## Install ##
+#############
+
+# all install targets should use catkin DESTINATION variables
+# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+
+## Mark executable scripts (Python etc.) for installation
+## in contrast to setup.py, you can choose the destination
+# install(PROGRAMS
+#   scripts/my_python_script
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark executables and/or libraries for installation
+# install(TARGETS can_pdp can_pdp_node
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark cpp header files for installation
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+# )
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+# install(FILES
+#   # myfile1
+#   # myfile2
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
+
+#############
+## Testing ##
+#############
+
+## Add gtest based cpp test target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_can_pdp.cpp)
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+# endif()
+
+## Add folders to be run by python nosetests
+# catkin_add_nosetests(test)
